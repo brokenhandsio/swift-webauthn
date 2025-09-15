@@ -35,11 +35,8 @@ public struct WebAuthnManager: Sendable {
     ///
     /// - Parameters:
     ///   - configuration: The configuration to use for this manager.
-    public init(configuration: Configuration) {
-        self.init(configuration: configuration, challengeGenerator: .live)
-    }
-    
-    package init(configuration: Configuration, challengeGenerator: ChallengeGenerator) {
+    ///   - challengeGenerator: The generator of challenge.
+    public init(configuration: Configuration, challengeGenerator: ChallengeGenerator = .live) {
         self.configuration = configuration
         self.challengeGenerator = challengeGenerator
     }

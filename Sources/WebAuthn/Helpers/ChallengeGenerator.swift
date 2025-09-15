@@ -11,10 +11,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct ChallengeGenerator: Sendable {
-    var generate: @Sendable () -> [UInt8]
+public struct ChallengeGenerator: Sendable {
+    public var generate: @Sendable () -> [UInt8]
 
-    package static var live: Self {
+    public init(generate: @Sendable @escaping () -> [UInt8]) {
+        self.generate = generate
+    }
+  
+    public static var live: Self {
         .init(generate: { [UInt8].random(count: 32) })
     }
 }
