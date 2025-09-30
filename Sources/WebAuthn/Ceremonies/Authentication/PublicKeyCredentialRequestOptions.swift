@@ -70,20 +70,40 @@ public struct PublicKeyCredentialRequestOptions: Encodable, Sendable {
 public struct PublicKeyCredentialDescriptor: Equatable, Encodable, Sendable {
     /// Defines hints as to how clients might communicate with a particular authenticator in order to obtain an
     /// assertion for a specific credential
-    public enum AuthenticatorTransport: String, Equatable, Encodable, Sendable {
+    public struct AuthenticatorTransport: RawRepresentable, Equatable, Hashable, Encodable, Sendable {
+        public let rawValue: String
+        
+        public init?(rawValue: String) {
+            switch rawValue {
+                case "usb", "nfc", "ble", "hybrid", "internal":
+                self.rawValue = rawValue
+            default:
+                return nil
+            }
+        }
+        
+        private init(_ rawValue: String) {
+            self.rawValue = rawValue
+        }
+        
+        public func encode(to encoder: any Encoder) throws {
+            var container = encoder.singleValueContainer()
+            try container.encode(rawValue)
+        }
+        
         /// Indicates the respective authenticator can be contacted over removable USB.
-        case usb
+        public static let usb = AuthenticatorTransport("usb")
         /// Indicates the respective authenticator can be contacted over Near Field Communication (NFC).
-        case nfc
+        public static let nfc = AuthenticatorTransport("nfc")
         /// Indicates the respective authenticator can be contacted over Bluetooth Smart (Bluetooth Low Energy / BLE).
-        case ble
+        public static let ble = AuthenticatorTransport("ble")
         /// Indicates the respective authenticator can be contacted using a combination of (often separate)
         /// data-transport and proximity mechanisms. This supports, for example, authentication on a desktop
         /// computer using a smartphone.
-        case hybrid
+        public static let hybrid = AuthenticatorTransport("hybrid")
         /// Indicates the respective authenticator is contacted using a client device-specific transport, i.e., it is
         /// a platform authenticator. These authenticators are not removable from the client device.
-        case `internal`
+        public static let `internal` = AuthenticatorTransport("internal")
     }
 
     /// Will always be ``CredentialType/publicKey``
@@ -120,6 +140,10 @@ public struct PublicKeyCredentialDescriptor: Equatable, Encodable, Sendable {
         case id
         case transports
     }
+}
+
+extension PublicKeyCredentialDescriptor.AuthenticatorTransport: CustomStringConvertible {
+    public var description: String { rawValue }
 }
 
 /// The Relying Party may require user verification for some of its operations but not for others, and may use this
