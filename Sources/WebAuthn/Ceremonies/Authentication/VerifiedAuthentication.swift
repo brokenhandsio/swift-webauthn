@@ -15,9 +15,34 @@ import Foundation
 
 /// On successful authentication, this structure contains a summary of the authentication flow
 public struct VerifiedAuthentication: Sendable {
-    public enum CredentialDeviceType: String, Sendable {
-        case singleDevice = "single_device"
-        case multiDevice = "multi_device"
+    public struct CredentialDeviceType: RawRepresentable, Equatable, Hashable, Codable, Sendable {
+        public let rawValue: String
+        
+        public init?(rawValue: String) {
+            switch rawValue {
+            case "single_device", "multi_device":
+                self.rawValue = rawValue
+            default:
+                return nil
+            }
+        }
+        
+        private init(_ rawValue: String) {
+            self.rawValue = rawValue
+        }
+        
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            rawValue = try container.decode(String.self)
+        }
+        
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.singleValueContainer()
+            try container.encode(rawValue)
+        }
+        
+        public static let singleDevice = CredentialDeviceType("single_device")
+        public static let multiDevice = CredentialDeviceType("multi_device")
     }
 
     /// The credential id associated with the public key
@@ -29,4 +54,8 @@ public struct VerifiedAuthentication: Sendable {
     public let credentialDeviceType: CredentialDeviceType
     /// Whether the authenticator is known to be backed up currently
     public let credentialBackedUp: Bool
+}
+
+extension VerifiedAuthentication.CredentialDeviceType: CustomStringConvertible {
+    public var description: String { rawValue }
 }
