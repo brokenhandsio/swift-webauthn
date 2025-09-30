@@ -148,13 +148,38 @@ extension PublicKeyCredentialDescriptor.AuthenticatorTransport: CustomStringConv
 
 /// The Relying Party may require user verification for some of its operations but not for others, and may use this
 /// type to express its needs.
-public enum UserVerificationRequirement: String, Encodable, Sendable {
+public struct UserVerificationRequirement: RawRepresentable, Equatable, Hashable, Encodable, Sendable {
+    public let rawValue: String
+    
+    public init?(rawValue: String) {
+        switch rawValue {
+            case "required", "preferred", "discouraged":
+            self.rawValue = rawValue
+        default:
+            return nil
+        }
+    }
+    
+    private init(_ rawValue: String) {
+        self.rawValue = rawValue
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
+    
     /// The Relying Party requires user verification for the operation and will fail the overall ceremony if the
     /// user wasn't verified.
-    case required
+    public static let required = UserVerificationRequirement("required")
     /// The Relying Party prefers user verification for the operation if possible, but will not fail the operation.
-    case preferred
+    public static let preferred = UserVerificationRequirement("preferred")
     /// The Relying Party does not want user verification employed during the operation (e.g., in the interest of
     /// minimizing disruption to the user interaction flow).
-    case discouraged
+    public static let discouraged = UserVerificationRequirement("discouraged")
 }
+
+extension UserVerificationRequirement: CustomStringConvertible {
+    public var description: String { rawValue }
+}
+
