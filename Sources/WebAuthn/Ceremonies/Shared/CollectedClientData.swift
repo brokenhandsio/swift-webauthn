@@ -22,9 +22,34 @@ public struct CollectedClientData: Codable, Hashable, Sendable {
         case originDoesNotMatch
     }
 
-    public enum CeremonyType: String, Codable, Sendable {
-        case create = "webauthn.create"
-        case assert = "webauthn.get"
+    public struct CeremonyType: RawRepresentable, Equatable, Hashable, Codable, Sendable {
+        public let rawValue: String
+        
+        public init?(rawValue: String) {
+            switch rawValue {
+            case "webauthn.create", "webauthn.get":
+                self.rawValue = rawValue
+            default:
+                return nil
+            }
+        }
+        
+        private init(_ rawValue: String) {
+            self.rawValue = rawValue
+        }
+        
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            rawValue = try container.decode(String.self)
+        }
+        
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.singleValueContainer()
+            try container.encode(rawValue)
+        }
+        
+        public static let create = CeremonyType("webauthn.create")
+        public static let assert = CeremonyType("webauthn.get")
     }
 
     /// Contains the string "webauthn.create" when creating new credentials,
@@ -41,4 +66,8 @@ public struct CollectedClientData: Codable, Hashable, Sendable {
         }
         guard origin == relyingPartyOrigin else { throw .originDoesNotMatch }
     }
+}
+
+extension CollectedClientData.CeremonyType: CustomStringConvertible {
+    public var description: String { rawValue }
 }
