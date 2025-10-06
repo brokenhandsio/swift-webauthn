@@ -119,9 +119,9 @@ public struct PublicKeyCredentialParameters: Equatable, Codable, Sendable {
     
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let type = try container.decode(CredentialType.self,forKey: .type)
-        let alg = try container.decode(COSEAlgorithmIdentifier.self, forKey: .alg)
-        self.init(type:type,alg:alg)
+
+        self.type = try container.decode(CredentialType.self, forKey: .type)
+        self.alg = try container.decode(COSEAlgorithmIdentifier.self, forKey: .alg)
     }
 }
 
