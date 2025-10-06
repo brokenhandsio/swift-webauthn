@@ -152,7 +152,7 @@ public struct PublicKeyCredentialRelyingPartyEntity: Codable, Sendable {
         self.name = src.name
     }
     
-    public init(id : String, name : String) {
+    public init(id: String, name: String) {
         self.id = id
         self.name = name
     }
