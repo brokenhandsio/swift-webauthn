@@ -141,7 +141,7 @@ extension Array where Element == PublicKeyCredentialParameters {
 /// creating a new credential.
 public struct PublicKeyCredentialRelyingPartyEntity: Codable, Sendable {
     /// A unique identifier for the Relying Party entity.
-    public let id: String
+    public var id: String
 
     /// A human-readable identifier for the Relying Party, intended only for display. For example, "ACME Corporation",
     /// "Wonderful Widgets, Inc." or "ОАО Примертех".
