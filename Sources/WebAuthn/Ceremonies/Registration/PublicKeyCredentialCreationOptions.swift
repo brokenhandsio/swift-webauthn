@@ -71,8 +71,14 @@ public struct PublicKeyCredentialCreationOptions: Codable, Sendable {
         self.attestation = try values.decode(AttestationConveyancePreference.self, forKey: .attestation)
     }
     
-    public init(challenge: [UInt8], user: PublicKeyCredentialUserEntity, relyingParty: PublicKeyCredentialRelyingPartyEntity, publicKeyCredentialParameters: [PublicKeyCredentialParameters],
-                timeout: Duration?, attestation: AttestationConveyancePreference) {
+    public init(
+        challenge: [UInt8],
+        user: PublicKeyCredentialUserEntity,
+        relyingParty: PublicKeyCredentialRelyingPartyEntity,
+        publicKeyCredentialParameters: [PublicKeyCredentialParameters],
+        timeout: Duration?,
+        attestation: AttestationConveyancePreference
+    ) {
         self.challenge = challenge
         self.user = user
         self.relyingParty = relyingParty
