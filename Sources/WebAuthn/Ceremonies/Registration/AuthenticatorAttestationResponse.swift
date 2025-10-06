@@ -39,10 +39,10 @@ extension AuthenticatorAttestationResponse: Codable {
     
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-    
+
         try container.encode(clientDataJSON.base64URLEncodedString(), forKey: .clientDataJSON)
         try container.encode(attestationObject.base64URLEncodedString(), forKey: .attestationObject)
-     }
+    }
 
 
     private enum CodingKeys: String, CodingKey {
