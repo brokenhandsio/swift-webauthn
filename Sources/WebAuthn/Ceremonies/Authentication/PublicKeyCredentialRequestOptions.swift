@@ -144,10 +144,10 @@ public struct PublicKeyCredentialDescriptor: Equatable, Codable, Sendable {
     
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let type = try container.decode(CredentialType.self,forKey: .type)
-        let id = try container.decodeBytesFromURLEncodedBase64( forKey: .id)
-        let transports = try container.decodeIfPresent([AuthenticatorTransport].self,forKey:.transports) ?? []
-        self.init(type: type, id:id, transports: transports)
+
+        self.type = try container.decode(CredentialType.self, forKey: .type)
+        self.id = try container.decodeBytesFromURLEncodedBase64(forKey: .id)
+        self.transports = try container.decodeIfPresent([AuthenticatorTransport].self, forKey: .transports) ?? []
     }
 
     private enum CodingKeys: String, CodingKey {
