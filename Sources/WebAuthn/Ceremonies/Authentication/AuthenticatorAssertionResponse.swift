@@ -49,7 +49,7 @@ public struct AuthenticatorAssertionResponse: Sendable {
 }
 
 extension AuthenticatorAssertionResponse: Codable {
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         clientDataJSON = try container.decodeBytesFromURLEncodedBase64(forKey: .clientDataJSON)
@@ -59,7 +59,7 @@ extension AuthenticatorAssertionResponse: Codable {
         attestationObject = try container.decodeBytesFromURLEncodedBase64IfPresent(forKey: .attestationObject)
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
          var container = encoder.container(keyedBy: CodingKeys.self)
      
         try container.encode(clientDataJSON.base64URLEncodedString(), forKey: .clientDataJSON)

@@ -35,7 +35,7 @@ public struct AuthenticationCredential: Sendable {
 }
 
 extension AuthenticationCredential: Codable {
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         id = try container.decode(URLEncodedBase64.self, forKey: .id)
@@ -45,7 +45,7 @@ extension AuthenticationCredential: Codable {
         type = try container.decode(CredentialType.self, forKey: .type)
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
          var container = encoder.container(keyedBy: CodingKeys.self)
      
          try container.encode(id, forKey: .id)

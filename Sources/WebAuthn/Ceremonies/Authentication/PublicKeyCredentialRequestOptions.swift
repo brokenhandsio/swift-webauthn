@@ -45,7 +45,7 @@ public struct PublicKeyCredentialRequestOptions: Codable, Sendable {
 
     // let extensions: [String: Any]
 
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(challenge.base64URLEncodedString(), forKey: .challenge)
@@ -133,7 +133,7 @@ public struct PublicKeyCredentialDescriptor: Equatable, Codable, Sendable {
         self.transports = transports
     }
 
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(type, forKey: .type)
