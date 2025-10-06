@@ -63,12 +63,12 @@ public struct PublicKeyCredentialCreationOptions: Codable, Sendable {
         
         self.challenge = try values.decodeBytesFromURLEncodedBase64(forKey: .challenge)
         self.user = try values.decode(PublicKeyCredentialUserEntity.self, forKey: .user)
-        self.relyingParty = try values.decode(PublicKeyCredentialRelyingPartyEntity.self, forKey:.relyingParty)
-        self.publicKeyCredentialParameters =  try values.decode([PublicKeyCredentialParameters].self, forKey:.publicKeyCredentialParameters)
-        if let timeout = try values.decodeIfPresent(UInt32.self,forKey:.timeout) {
-            self.timeout = Duration.milliseconds(timeout)
+        self.relyingParty = try values.decode(PublicKeyCredentialRelyingPartyEntity.self, forKey: .relyingParty)
+        self.publicKeyCredentialParameters =  try values.decode([PublicKeyCredentialParameters].self, forKey: .publicKeyCredentialParameters)
+        if let timeout = try values.decodeIfPresent(UInt32.self, forKey: .timeout) {
+            self.timeout = .milliseconds(timeout)
         }
-        self.attestation = try values.decode(AttestationConveyancePreference.self, forKey:.attestation)
+        self.attestation = try values.decode(AttestationConveyancePreference.self, forKey: .attestation)
     }
     
     public init(challenge: [UInt8], user: PublicKeyCredentialUserEntity, relyingParty: PublicKeyCredentialRelyingPartyEntity, publicKeyCredentialParameters: [PublicKeyCredentialParameters],
