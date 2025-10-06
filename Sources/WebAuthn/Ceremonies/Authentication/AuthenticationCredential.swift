@@ -46,14 +46,14 @@ extension AuthenticationCredential: Codable {
     }
     
     public func encode(to encoder: any Encoder) throws {
-         var container = encoder.container(keyedBy: CodingKeys.self)
-     
-         try container.encode(id, forKey: .id)
-         try container.encode(rawID.base64URLEncodedString(), forKey: .rawID)
-         try container.encode(response, forKey: .response)
-         try container.encodeIfPresent(authenticatorAttachment, forKey: .authenticatorAttachment)
-         try container.encode(type, forKey: .type)
-      }
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(id, forKey: .id)
+        try container.encode(rawID.base64URLEncodedString(), forKey: .rawID)
+        try container.encode(response, forKey: .response)
+        try container.encodeIfPresent(authenticatorAttachment, forKey: .authenticatorAttachment)
+        try container.encode(type, forKey: .type)
+    }
 
 
     private enum CodingKeys: String, CodingKey {
