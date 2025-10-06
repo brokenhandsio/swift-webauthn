@@ -60,14 +60,14 @@ extension AuthenticatorAssertionResponse: Codable {
     }
     
     public func encode(to encoder: any Encoder) throws {
-         var container = encoder.container(keyedBy: CodingKeys.self)
-     
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
         try container.encode(clientDataJSON.base64URLEncodedString(), forKey: .clientDataJSON)
         try container.encode(authenticatorData.base64URLEncodedString(), forKey: .authenticatorData)
         try container.encode(signature.base64URLEncodedString(), forKey: .signature)
-        try container.encodeIfPresent(userHandle?.base64URLEncodedString(),forKey: .userHandle)
-        try container.encodeIfPresent(attestationObject?.base64URLEncodedString(),forKey: .attestationObject)
-      }
+        try container.encodeIfPresent(userHandle?.base64URLEncodedString(), forKey: .userHandle)
+        try container.encodeIfPresent(attestationObject?.base64URLEncodedString(), forKey: .attestationObject)
+    }
 
 
     private enum CodingKeys: String, CodingKey {
