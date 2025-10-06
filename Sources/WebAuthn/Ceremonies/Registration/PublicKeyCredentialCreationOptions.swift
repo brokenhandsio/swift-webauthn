@@ -197,10 +197,10 @@ public struct PublicKeyCredentialUserEntity: Codable, Sendable {
     
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let id = try container.decodeBytesFromURLEncodedBase64(forKey: .id)
-        let name = try container.decode(String.self, forKey: .name)
-        let displayName = try container.decode(String.self, forKey: .displayName)
-        self.init(id: id, name: name, displayName: displayName)
+
+        self.id = try container.decodeBytesFromURLEncodedBase64(forKey: .id)
+        self.name = try container.decode(String.self, forKey: .name)
+        self.displayName = try container.decode(String.self, forKey: .displayName)
     }
 
 
