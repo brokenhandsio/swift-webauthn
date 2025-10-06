@@ -145,7 +145,7 @@ public struct PublicKeyCredentialRelyingPartyEntity: Codable, Sendable {
 
     /// A human-readable identifier for the Relying Party, intended only for display. For example, "ACME Corporation",
     /// "Wonderful Widgets, Inc." or "ОАО Примертех".
-    public let name: String
+    public var name: String
 
     public init(_ src : PublicKeyCredentialRelyingPartyEntity) {
         self.id = src.id
