@@ -60,7 +60,8 @@ public struct PublicKeyCredentialRequestOptions: Codable, Sendable {
         timeout: Duration?,
         relyingPartyID: String,
         allowCredentials: [PublicKeyCredentialDescriptor]?,
-        userVerification: UserVerificationRequirement?) {
+        userVerification: UserVerificationRequirement?
+    ) {
         self.challenge = challenge
         self.timeout = timeout
         self.relyingPartyID = relyingPartyID
