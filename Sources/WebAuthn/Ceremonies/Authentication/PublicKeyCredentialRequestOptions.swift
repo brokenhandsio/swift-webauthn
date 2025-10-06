@@ -74,12 +74,12 @@ public struct PublicKeyCredentialRequestOptions: Codable, Sendable {
 
         self.challenge = try values.decodeBytesFromURLEncodedBase64(forKey: .challenge)
 
-        if let timeout = try values.decodeIfPresent(UInt32.self, forKey:.timeout) {
-            self.timeout=Duration.milliseconds(timeout)
+        if let timeout = try values.decodeIfPresent(UInt32.self, forKey: .timeout) {
+            self.timeout = .milliseconds(timeout)
         }
-        self.relyingPartyID=try values.decode(String.self, forKey:.relyingPartyID)
-        self.allowCredentials=try values.decodeIfPresent([PublicKeyCredentialDescriptor].self,forKey: .allowCredentials)
-        self.userVerification=try values.decodeIfPresent(UserVerificationRequirement.self,forKey: .userVerification)
+        self.relyingPartyID = try values.decode(String.self, forKey: .relyingPartyID)
+        self.allowCredentials = try values.decodeIfPresent([PublicKeyCredentialDescriptor].self, forKey: .allowCredentials)
+        self.userVerification = try values.decodeIfPresent(UserVerificationRequirement.self, forKey: .userVerification)
     }
 
     private enum CodingKeys: String, CodingKey {
