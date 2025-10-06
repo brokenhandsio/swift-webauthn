@@ -147,11 +147,6 @@ public struct PublicKeyCredentialRelyingPartyEntity: Codable, Sendable {
     /// "Wonderful Widgets, Inc." or "ОАО Примертех".
     public var name: String
 
-    public init(_ src : PublicKeyCredentialRelyingPartyEntity) {
-        self.id = src.id
-        self.name = src.name
-    }
-    
     public init(id: String, name: String) {
         self.id = id
         self.name = name
