@@ -18,7 +18,7 @@ import Foundation
 /// When encoding using `Encodable`, the byte arrays are encoded as base64url.
 ///
 /// - SeeAlso: https://www.w3.org/TR/webauthn-2/#dictionary-assertion-options
-public struct PublicKeyCredentialRequestOptions: Codable, Sendable {
+public struct PublicKeyCredentialRequestOptions: Sendable {
     /// A challenge that the authenticator signs, along with other data, when producing an authentication assertion
     ///
     /// When encoding using `Encodable` this is encoded as base64url.
@@ -45,16 +45,6 @@ public struct PublicKeyCredentialRequestOptions: Codable, Sendable {
 
     // let extensions: [String: Any]
 
-    public func encode(to encoder: any Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-
-        try container.encode(challenge.base64URLEncodedString(), forKey: .challenge)
-        try container.encodeIfPresent(timeout?.milliseconds, forKey: .timeout)
-        try container.encode(relyingPartyID, forKey: .relyingPartyID)
-        try container.encodeIfPresent(allowCredentials, forKey: .allowCredentials)
-        try container.encodeIfPresent(userVerification, forKey: .userVerification)
-    }
-    
     public init(
         challenge: [UInt8],
         timeout: Duration?,
@@ -68,7 +58,9 @@ public struct PublicKeyCredentialRequestOptions: Codable, Sendable {
         self.allowCredentials = allowCredentials
         self.userVerification = userVerification
     }
+}
 
+extension PublicKeyCredentialRequestOptions: Codable {
     public init(from decoder: any Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -80,6 +72,16 @@ public struct PublicKeyCredentialRequestOptions: Codable, Sendable {
         self.relyingPartyID = try values.decode(String.self, forKey: .relyingPartyID)
         self.allowCredentials = try values.decodeIfPresent([PublicKeyCredentialDescriptor].self, forKey: .allowCredentials)
         self.userVerification = try values.decodeIfPresent(UserVerificationRequirement.self, forKey: .userVerification)
+    }
+    
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(challenge.base64URLEncodedString(), forKey: .challenge)
+        try container.encodeIfPresent(timeout?.milliseconds, forKey: .timeout)
+        try container.encode(relyingPartyID, forKey: .relyingPartyID)
+        try container.encodeIfPresent(allowCredentials, forKey: .allowCredentials)
+        try container.encodeIfPresent(userVerification, forKey: .userVerification)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -94,7 +96,7 @@ public struct PublicKeyCredentialRequestOptions: Codable, Sendable {
 /// Information about a generated credential.
 ///
 /// When encoding using `Encodable`, `id` is encoded as base64url.
-public struct PublicKeyCredentialDescriptor: Equatable, Codable, Sendable {
+public struct PublicKeyCredentialDescriptor: Equatable, Sendable {
     /// Defines hints as to how clients might communicate with a particular authenticator in order to obtain an
     /// assertion for a specific credential
     public struct AuthenticatorTransport: UnreferencedStringEnumeration, Sendable {
@@ -138,6 +140,16 @@ public struct PublicKeyCredentialDescriptor: Equatable, Codable, Sendable {
         self.id = id
         self.transports = transports
     }
+}
+
+extension PublicKeyCredentialDescriptor: Codable {
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        self.type = try container.decode(CredentialType.self, forKey: .type)
+        self.id = try container.decodeBytesFromURLEncodedBase64(forKey: .id)
+        self.transports = try container.decodeIfPresent([AuthenticatorTransport].self, forKey: .transports) ?? []
+    }
 
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
@@ -145,14 +157,6 @@ public struct PublicKeyCredentialDescriptor: Equatable, Codable, Sendable {
         try container.encode(type, forKey: .type)
         try container.encode(id.base64URLEncodedString(), forKey: .id)
         try container.encodeIfPresent(transports, forKey: .transports)
-    }
-    
-    public init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        self.type = try container.decode(CredentialType.self, forKey: .type)
-        self.id = try container.decodeBytesFromURLEncodedBase64(forKey: .id)
-        self.transports = try container.decodeIfPresent([AuthenticatorTransport].self, forKey: .transports) ?? []
     }
 
     private enum CodingKeys: String, CodingKey {
