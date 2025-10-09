@@ -13,13 +13,13 @@
 
 import Foundation
 
-protocol TestSigner {
+protocol TestSigner: Sendable {
     static func sign(data: Data) throws -> [UInt8]
     
     static var signature: [UInt8] { get throws }
 }
 
-struct TestKeyConfiguration {
+struct TestKeyConfiguration: Sendable {
     var signer: any TestSigner.Type
     var credentialPublicKeyBuilder: TestCredentialPublicKeyBuilder
     var authDataBuilder: TestAuthDataBuilder
