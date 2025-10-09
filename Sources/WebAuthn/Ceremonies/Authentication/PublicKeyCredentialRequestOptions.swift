@@ -70,40 +70,25 @@ public struct PublicKeyCredentialRequestOptions: Encodable, Sendable {
 public struct PublicKeyCredentialDescriptor: Equatable, Encodable, Sendable {
     /// Defines hints as to how clients might communicate with a particular authenticator in order to obtain an
     /// assertion for a specific credential
-    public struct AuthenticatorTransport: RawRepresentable, Equatable, Hashable, Encodable, Sendable {
-        public let rawValue: String
-        
-        public init?(rawValue: String) {
-            switch rawValue {
-                case "usb", "nfc", "ble", "hybrid", "internal":
-                self.rawValue = rawValue
-            default:
-                return nil
-            }
-        }
-        
-        private init(_ rawValue: String) {
+    public struct AuthenticatorTransport: UnreferencedStringEnumeration, Sendable {
+        public var rawValue: String
+        public init(_ rawValue: String) {
             self.rawValue = rawValue
         }
         
-        public func encode(to encoder: any Encoder) throws {
-            var container = encoder.singleValueContainer()
-            try container.encode(rawValue)
-        }
-        
         /// Indicates the respective authenticator can be contacted over removable USB.
-        public static let usb = AuthenticatorTransport("usb")
+        public static let usb: Self = "usb"
         /// Indicates the respective authenticator can be contacted over Near Field Communication (NFC).
-        public static let nfc = AuthenticatorTransport("nfc")
+        public static let nfc: Self = "nfc"
         /// Indicates the respective authenticator can be contacted over Bluetooth Smart (Bluetooth Low Energy / BLE).
-        public static let ble = AuthenticatorTransport("ble")
+        public static let ble: Self = "ble"
         /// Indicates the respective authenticator can be contacted using a combination of (often separate)
         /// data-transport and proximity mechanisms. This supports, for example, authentication on a desktop
         /// computer using a smartphone.
-        public static let hybrid = AuthenticatorTransport("hybrid")
+        public static let hybrid: Self = "hybrid"
         /// Indicates the respective authenticator is contacted using a client device-specific transport, i.e., it is
         /// a platform authenticator. These authenticators are not removable from the client device.
-        public static let `internal` = AuthenticatorTransport("internal")
+        public static let `internal`: Self = "internal"
     }
 
     /// Will always be ``CredentialType/publicKey``
@@ -142,44 +127,20 @@ public struct PublicKeyCredentialDescriptor: Equatable, Encodable, Sendable {
     }
 }
 
-extension PublicKeyCredentialDescriptor.AuthenticatorTransport: CustomStringConvertible {
-    public var description: String { rawValue }
-}
-
 /// The Relying Party may require user verification for some of its operations but not for others, and may use this
 /// type to express its needs.
-public struct UserVerificationRequirement: RawRepresentable, Equatable, Hashable, Encodable, Sendable {
-    public let rawValue: String
-    
-    public init?(rawValue: String) {
-        switch rawValue {
-            case "required", "preferred", "discouraged":
-            self.rawValue = rawValue
-        default:
-            return nil
-        }
-    }
-    
-    private init(_ rawValue: String) {
+public struct UserVerificationRequirement: UnreferencedStringEnumeration, Sendable {
+    public var rawValue: String
+    public init(_ rawValue: String) {
         self.rawValue = rawValue
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode(rawValue)
     }
     
     /// The Relying Party requires user verification for the operation and will fail the overall ceremony if the
     /// user wasn't verified.
-    public static let required = UserVerificationRequirement("required")
+    public static let required: Self = "required"
     /// The Relying Party prefers user verification for the operation if possible, but will not fail the operation.
-    public static let preferred = UserVerificationRequirement("preferred")
+    public static let preferred: Self = "preferred"
     /// The Relying Party does not want user verification employed during the operation (e.g., in the interest of
     /// minimizing disruption to the user interaction flow).
-    public static let discouraged = UserVerificationRequirement("discouraged")
+    public static let discouraged: Self = "discouraged"
 }
-
-extension UserVerificationRequirement: CustomStringConvertible {
-    public var description: String { rawValue }
-}
-

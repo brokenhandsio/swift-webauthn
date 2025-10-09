@@ -64,10 +64,10 @@ struct ParsedAuthenticatorAttestationResponse {
             throw WebAuthnError.invalidAuthData
         }
         guard let formatCBOR = decodedAttestationObject["fmt"],
-            case let .utf8String(format) = formatCBOR,
-            let attestationFormat = AttestationFormat(rawValue: format) else {
+            case let .utf8String(format) = formatCBOR else {
             throw WebAuthnError.invalidFmt
         }
+        let attestationFormat = AttestationFormat(format)
 
         guard let attestationStatement = decodedAttestationObject["attStmt"] else {
             throw WebAuthnError.missingAttStmt
