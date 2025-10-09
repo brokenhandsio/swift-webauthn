@@ -21,8 +21,17 @@ import Foundation
 public struct PublicKeyCredentialRequestOptions: Sendable {
     /// A challenge that the authenticator signs, along with other data, when producing an authentication assertion.
     ///
-    /// When encoding using `Encodable` this is encoded as base64url.
-    public var challenge: [UInt8]
+    /// The Relying Party should store the challenge temporarily until the authentication flow is complete. When encoding using `Encodable` this is encoded as base64url.
+    ///
+    /// - Warning: Although the challenge can be changed, doing so is not recommended and can lead to an insecure implementation of the WebAuthn protocol. See ``setUnsafeChallenge(_:)``.
+    public private(set) var challenge: [UInt8]
+
+    /// Unsafely change the challenge that will be delivered to the client.
+    ///
+    /// - Warning: Although the challenge can be changed, doing so is not recommended and can lead to an insecure implementation of the WebAuthn protocol.
+    public mutating func setUnsafeChallenge(_ newValue: [UInt8]) {
+        challenge = newValue
+    }
 
     /// A time, in seconds, that the caller is willing to wait for the call to complete. This is treated as a
     /// hint, and may be overridden by the client.

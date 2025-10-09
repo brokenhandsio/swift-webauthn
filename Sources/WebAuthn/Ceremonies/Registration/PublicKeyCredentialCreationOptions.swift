@@ -25,7 +25,16 @@ public struct PublicKeyCredentialCreationOptions: Sendable {
     ///
     /// The Relying Party should store the challenge temporarily until the registration flow is complete. When
     /// encoding using `Encodable`, the challenge is base64url encoded.
-    public let challenge: [UInt8]
+    ///
+    /// - Warning: Although the challenge can be changed, dooing so is not recommended and can lead to an insecure implementation of the WebAuthn protocol. See ``setUnsafeChallenge(_:)``.
+    public private(set) var challenge: [UInt8]
+    
+    /// Unsafely change the challenge that will be delivered to the client.
+    ///
+    /// - Warning: Although the challenge can be changed, doing so is not recommended and can lead to an insecure implementation of the WebAuthn protocol.
+    public mutating func setUnsafeChallenge(_ newValue: [UInt8]) {
+        challenge = newValue
+    }
 
     /// Contains names and an identifier for the user account performing the registration.
     public var user: PublicKeyCredentialUserEntity
