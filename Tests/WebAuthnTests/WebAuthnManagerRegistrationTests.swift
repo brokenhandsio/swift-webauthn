@@ -398,7 +398,6 @@ struct WebAuthnManagerRegistrationTests {
             rawID: credentialID,
             attestationObject: attestationObject
         )
-        #expect(credential != nil)
 
         #expect(credential.id == credentialID.base64EncodedString().asString())
         #expect(credential.publicKey == credentialPublicKey)
