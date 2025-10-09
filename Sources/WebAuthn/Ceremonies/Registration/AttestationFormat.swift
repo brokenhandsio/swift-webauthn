@@ -11,12 +11,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-public enum AttestationFormat: String, RawRepresentable, Equatable, Sendable {
-    case packed
-    case tpm
-    case androidKey = "android-key"
-    case androidSafetynet = "android-safetynet"
-    case fidoU2F = "fido-u2f"
-    case apple
-    case none
+public struct AttestationFormat: UnreferencedStringEnumeration, Sendable {
+    public var rawValue: String
+    public init(_ rawValue: String) {
+        self.rawValue = rawValue
+    }
+    
+    public static let packed: Self = "packed"
+    public static let tpm: Self = "tpm"
+    public static let androidKey: Self = "android-key"
+    public static let androidSafetynet: Self = "android-safetynet"
+    public static let fidoU2F: Self = "fido-u2f"
+    public static let apple: Self = "apple"
+    public static let none: Self = "none"
 }

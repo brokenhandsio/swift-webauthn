@@ -15,9 +15,14 @@ import Foundation
 
 /// On successful authentication, this structure contains a summary of the authentication flow
 public struct VerifiedAuthentication: Sendable {
-    public enum CredentialDeviceType: String, Sendable {
-        case singleDevice = "single_device"
-        case multiDevice = "multi_device"
+    public struct CredentialDeviceType: UnreferencedStringEnumeration, Sendable {
+        public var rawValue: String
+        public init(_ rawValue: String) {
+            self.rawValue = rawValue
+        }
+        
+        public static let singleDevice: Self = "single_device"
+        public static let multiDevice: Self = "multi_device"
     }
 
     /// The credential id associated with the public key

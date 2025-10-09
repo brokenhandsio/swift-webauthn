@@ -22,9 +22,14 @@ public struct CollectedClientData: Codable, Hashable, Sendable {
         case originDoesNotMatch
     }
 
-    public enum CeremonyType: String, Codable, Sendable {
-        case create = "webauthn.create"
-        case assert = "webauthn.get"
+    public struct CeremonyType: UnreferencedStringEnumeration, Sendable {
+        public var rawValue: String
+        public init(_ rawValue: String) {
+            self.rawValue = rawValue
+        }
+        
+        public static let create: Self = "webauthn.create"
+        public static let assert: Self = "webauthn.get"
     }
 
     /// Contains the string "webauthn.create" when creating new credentials,
