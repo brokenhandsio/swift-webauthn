@@ -47,7 +47,7 @@ extension RegistrationCredential: Codable {
         self.rawID = rawID
         attestationResponse = try container.decode(AuthenticatorAttestationResponse.self, forKey: .attestationResponse)
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
