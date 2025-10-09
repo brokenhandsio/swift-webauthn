@@ -14,10 +14,15 @@
 /// Options to specify the Relying Party's preference regarding attestation conveyance during credential generation.
 ///
 /// Currently only supports `none`.
-public enum AttestationConveyancePreference: String, Codable, Sendable {
+public struct AttestationConveyancePreference: UnreferencedStringEnumeration, Sendable {
+    public var rawValue: String
+    public init(_ rawValue: String) {
+        self.rawValue = rawValue
+    }
+    
     /// Indicates the Relying Party is not interested in authenticator attestation.
-    case none
-    // case indirect
-    // case direct
-    // case enterprise
+    public static let none: Self = "none"
+//    public static let indirect: Self = "indirect"
+//    public static let direct: Self = "direct"
+//    public static let enterprise: Self = "enterprise"
 }
