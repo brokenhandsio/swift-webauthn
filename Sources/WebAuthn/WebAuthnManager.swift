@@ -46,7 +46,10 @@ public struct WebAuthnManager: Sendable {
 
     /// Generate a new set of registration data to be sent to the client.
     ///
-    /// This method will use the Relying Party information from the WebAuthnManager's configuration  to create ``PublicKeyCredentialCreationOptions``
+    /// This method will use the Relying Party information from the WebAuthnManager's configuration  to create a ready-to-consume ``PublicKeyCredentialCreationOptions`` on the client.
+    ///
+    /// - Important: You must store the ``PublicKeyCredentialCreationOptions/challenge`` value returned by this method and validate against it during the ``finishRegistration(challenge:credentialCreationData:requireUserVerification:supportedPublicKeyAlgorithms:pemRootCertificatesByFormat:confirmCredentialIDNotRegisteredYet:)`` phase of registration.
+    ///
     /// - Parameters:
     ///   - user: The user to register.
     ///   - timeout: How long the browser should give the user to choose an authenticator. This value
@@ -126,7 +129,9 @@ public struct WebAuthnManager: Sendable {
         )
     }
 
-    /// Generate options for retrieving a credential via navigator.credentials.get()
+    /// Generate options for retrieving a credential via `navigator.credentials.get()`.
+    ///
+    /// - Important: You must store the ``PublicKeyCredentialRequestOptions/challenge`` value returned by this method and validate against it during the ``finishAuthentication(credential:expectedChallenge:credentialPublicKey:credentialCurrentSignCount:requireUserVerification:)`` phase of authentication.
     ///
     /// - Parameters:
     ///   - timeout: How long the browser should give the user to choose an authenticator. This value
