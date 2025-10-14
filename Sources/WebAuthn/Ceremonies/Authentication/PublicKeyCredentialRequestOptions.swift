@@ -19,7 +19,7 @@ import Foundation
 ///
 /// - SeeAlso: https://www.w3.org/TR/webauthn-2/#dictionary-assertion-options
 public struct PublicKeyCredentialRequestOptions: Sendable {
-    /// A challenge that the authenticator signs, along with other data, when producing an authentication assertion
+    /// A challenge that the authenticator signs, along with other data, when producing an authentication assertion.
     ///
     /// When encoding using `Encodable` this is encoded as base64url.
     public var challenge: [UInt8]
@@ -45,6 +45,16 @@ public struct PublicKeyCredentialRequestOptions: Sendable {
 
     // let extensions: [String: Any]
 
+    /// Initialize a credential request options dictionary directly.
+    ///
+    /// - Warning: Manually initializing options dictionaries can easily lead to insecure implementations of the WebAuthn protocol. Whenever possible, create an options dictionary using ``WebAuthnManager/beginAuthentication(timeout:allowCredentials:userVerification:)`` instead.
+    ///
+    /// - Parameters:
+    ///   - challenge: A challenge that the authenticator signs, along with other data, when producing an authentication assertion.
+    ///   - timeout: A time, in seconds, that the caller is willing to wait for the call to complete. This is treated as a hint, and may be overridden by the client.
+    ///   - relyingPartyID: The ID of the Relying Party making the request.
+    ///   - allowCredentials: Optionally used by the client to find authenticators eligible for this authentication ceremony.
+    ///   - userVerification: Specifies whether the user should be verified during the authentication ceremony.
     public init(
         challenge: [UInt8],
         timeout: Duration?,
