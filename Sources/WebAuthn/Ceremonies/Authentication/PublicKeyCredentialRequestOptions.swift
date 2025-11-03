@@ -23,13 +23,13 @@ public struct PublicKeyCredentialRequestOptions: Sendable {
     ///
     /// The Relying Party should store the challenge temporarily until the authentication flow is complete. When encoding using `Encodable` this is encoded as base64url.
     ///
-    /// - Warning: Although the challenge can be changed, doing so is not recommended and can lead to an insecure implementation of the WebAuthn protocol. See ``setUnsafeChallenge(_:)``.
+    /// - SeeAlso: See ``unsafeSetChallenge(_:)`` for updating the challenge.
     public private(set) var challenge: [UInt8]
 
     /// Unsafely change the challenge that will be delivered to the client.
     ///
     /// - Warning: Although the challenge can be changed, doing so is not recommended and can lead to an insecure implementation of the WebAuthn protocol.
-    public mutating func setUnsafeChallenge(_ newValue: [UInt8]) {
+    public mutating func unsafeSetChallenge(_ newValue: [UInt8]) {
         challenge = newValue
     }
 
