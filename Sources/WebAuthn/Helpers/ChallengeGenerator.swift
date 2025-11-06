@@ -11,8 +11,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct ChallengeGenerator: Sendable {
-    static let challengeSize: Int = 32
+public struct ChallengeGenerator: Sendable {
+    public static let challengeSize: Int = 32
 
     var generate: @Sendable () -> [UInt8]
 
