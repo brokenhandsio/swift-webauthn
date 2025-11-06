@@ -12,9 +12,11 @@
 //===----------------------------------------------------------------------===//
 
 package struct ChallengeGenerator: Sendable {
+    static let challengeSize: Int = 32
+
     var generate: @Sendable () -> [UInt8]
 
     package static var live: Self {
-        .init(generate: { [UInt8].random(count: 32) })
+        .init(generate: { [UInt8].random(count: challengeSize) })
     }
 }
