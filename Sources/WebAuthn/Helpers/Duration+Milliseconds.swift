@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-extension Duration {
+public extension Duration {
     /// The value of a positive duration in milliseconds, suitable to be encoded in WebAuthn types.
     var milliseconds: Int64 {
         let (seconds, attoseconds) = self.components
