@@ -83,6 +83,8 @@ public struct WebAuthnManager: Sendable {
     ///   - challenge: The challenge passed to the authenticator within the preceding registration options.
     ///   - credentialCreationData: The value returned from `navigator.credentials.create()`
     ///   - requireUserVerification: Whether or not to require that the authenticator verified the user.
+    ///   - requireUserPresence: Whether or not to require that the user was present during registration.
+    ///     Set to `false` for silent/conditional passkey registration (e.g., iOS 26 conditional registration).
     ///   - supportedPublicKeyAlgorithms: A list of public key algorithms the Relying Party chooses to restrict
     ///     support to. Defaults to all supported algorithms.
     ///   - pemRootCertificatesByFormat: A list of root certificates used for attestation verification.
@@ -95,6 +97,7 @@ public struct WebAuthnManager: Sendable {
         challenge: [UInt8],
         credentialCreationData: RegistrationCredential,
         requireUserVerification: Bool = false,
+        requireUserPresence: Bool = true,
         supportedPublicKeyAlgorithms: [PublicKeyCredentialParameters] = .supported,
         pemRootCertificatesByFormat: [AttestationFormat: [Data]] = [:],
         confirmCredentialIDNotRegisteredYet: (String) async throws -> Bool
@@ -103,6 +106,7 @@ public struct WebAuthnManager: Sendable {
         let attestedCredentialData = try await parsedData.verify(
             storedChallenge: challenge,
             verifyUser: requireUserVerification,
+            requireUserPresence: requireUserPresence,
             relyingPartyID: configuration.relyingPartyID,
             relyingPartyOrigin: configuration.relyingPartyOrigin,
             supportedPublicKeyAlgorithms: supportedPublicKeyAlgorithms,
