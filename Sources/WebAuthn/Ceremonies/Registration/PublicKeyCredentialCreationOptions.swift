@@ -53,6 +53,9 @@ public struct PublicKeyCredentialCreationOptions: Sendable {
     /// Sets the Relying Party's preference for attestation conveyance. At the time of writing only ``AttestationConveyancePreference/none`` is supported.
     public var attestation: AttestationConveyancePreference
 
+    /// A dictionary describing the Relying Party's requirements regarding authenticator attributes.
+    public var authenticatorSelection: AuthenticatorSelection?
+
     /// Initialize a credential creation options dictionary directly.
     ///
     /// - Warning: Manually initializing options dictionaries can easily lead to insecure implementations of the WebAuthn protocol. Whenever possible, create an options dictionary using ``WebAuthnManager/beginRegistration(user:timeout:attestation:publicKeyCredentialParameters:)`` instead.
@@ -64,13 +67,15 @@ public struct PublicKeyCredentialCreationOptions: Sendable {
     ///   - publicKeyCredentialParameters: A list of key types and signature algorithms the Relying Party supports. Ordered from most preferred to least preferred.
     ///   - timeout: A time, in seconds, that the caller is willing to wait for the call to complete. This is treated as a hint, and may be overridden by the client.
     ///   - attestation: Sets the Relying Party's preference for attestation conveyance. At the time of writing only `none` is supported.
+    ///   - authenticatorSelection: A dictionary describing the Relying Party's requirements regarding authenticator attributes.
     public init(
         challenge: [UInt8],
         user: PublicKeyCredentialUserEntity,
         relyingParty: PublicKeyCredentialRelyingPartyEntity,
         publicKeyCredentialParameters: [PublicKeyCredentialParameters],
         timeout: Duration?,
-        attestation: AttestationConveyancePreference
+        attestation: AttestationConveyancePreference,
+        authenticatorSelection: AuthenticatorSelection? = nil
     ) {
         self.challenge = challenge
         self.user = user
@@ -78,6 +83,7 @@ public struct PublicKeyCredentialCreationOptions: Sendable {
         self.publicKeyCredentialParameters = publicKeyCredentialParameters
         self.timeout = timeout
         self.attestation = attestation
+        self.authenticatorSelection = authenticatorSelection
     }
 }
 
@@ -93,6 +99,8 @@ extension PublicKeyCredentialCreationOptions: Codable {
             self.timeout = .milliseconds(timeout)
         }
         self.attestation = try values.decode(AttestationConveyancePreference.self, forKey: .attestation)
+        self.authenticatorSelection = try values.decodeIfPresent(
+            AuthenticatorSelection.self, forKey: .authenticatorSelection)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -104,6 +112,7 @@ extension PublicKeyCredentialCreationOptions: Codable {
         try container.encode(publicKeyCredentialParameters, forKey: .publicKeyCredentialParameters)
         try container.encodeIfPresent(timeout?.milliseconds, forKey: .timeout)
         try container.encode(attestation, forKey: .attestation)
+        try container.encodeIfPresent(authenticatorSelection, forKey: .authenticatorSelection)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -113,6 +122,7 @@ extension PublicKeyCredentialCreationOptions: Codable {
         case publicKeyCredentialParameters = "pubKeyCredParams"
         case timeout
         case attestation
+        case authenticatorSelection
     }
 }
 
