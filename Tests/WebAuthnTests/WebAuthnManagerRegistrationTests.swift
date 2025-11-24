@@ -403,6 +403,71 @@ struct WebAuthnManagerRegistrationTests {
         #expect(credential.publicKey == credentialPublicKey)
     }
     
+    @Test(arguments: [
+        TestKeyConfiguration.ecdsa,
+        TestKeyConfiguration.rsa,
+    ])
+    func credentialAAGUIDAccessorReturnsCorrectValue(keyConfiguration: TestKeyConfiguration) async throws {
+        let testAAGUID = AAGUID(uuidString: "dd4ec289-e01d-41c9-bb89-70fa845d4bf2")!
+        let credentialID: [UInt8] = [0, 1, 0, 1, 0, 1]
+        let credentialPublicKey: [UInt8] = keyConfiguration.credentialPublicKey
+        let authData = keyConfiguration.authDataBuilder
+            .attestedCredData(
+                authenticatorAttestationGUID: testAAGUID,
+                credentialPublicKey: credentialPublicKey
+            )
+            .noExtensionData()
+        let attestationObject = keyConfiguration.attestationObjectBuilder
+            .authData(authData)
+            .build()
+            .cborEncoded
+
+        let credential = try await finishRegistration(
+            rawID: credentialID,
+            attestationObject: attestationObject
+        )
+
+        // Test that credential.aaguid returns the correct AAGUID
+        #expect(credential.aaguid != nil)
+        #expect(credential.aaguid?.id == testAAGUID.id)
+        #expect(credential.aaguid?.bytes == testAAGUID.bytes)
+        
+        // Test that credential.attestationObject.aaguid returns the same value
+        #expect(credential.attestationObject.aaguid != nil)
+        #expect(credential.attestationObject.aaguid?.id == testAAGUID.id)
+        #expect(credential.attestationObject.aaguid?.bytes == testAAGUID.bytes)
+        
+        // Verify they return the same value
+        #expect(credential.aaguid == credential.attestationObject.aaguid)
+    }
+    
+    @Test(arguments: [
+        TestKeyConfiguration.ecdsa,
+        TestKeyConfiguration.rsa,
+    ])
+    func credentialAAGUIDAccessorReturnsAnonymousByDefault(keyConfiguration: TestKeyConfiguration) async throws {
+        // When no AAGUID is specified, it defaults to .anonymous
+        let credentialID: [UInt8] = [0, 1, 0, 1, 0, 1]
+        let credentialPublicKey: [UInt8] = keyConfiguration.credentialPublicKey
+        let authData = keyConfiguration.authDataBuilder
+            .attestedCredData(credentialPublicKey: credentialPublicKey) // Uses .anonymous by default
+            .noExtensionData()
+        let attestationObject = keyConfiguration.attestationObjectBuilder
+            .authData(authData)
+            .build()
+            .cborEncoded
+
+        let credential = try await finishRegistration(
+            rawID: credentialID,
+            attestationObject: attestationObject
+        )
+
+        // Test that credential.aaguid returns the anonymous AAGUID
+        #expect(credential.aaguid != nil)
+        #expect(credential.aaguid == .anonymous)
+        #expect(credential.aaguid?.bytes == Array(repeating: 0, count: 16))
+    }
+    
     @Test
     func finishRegistrationFuzzying() async throws {
         for _ in 1...50 {
