@@ -57,12 +57,15 @@ public struct WebAuthnManager: Sendable {
     ///   - attestation: The Relying Party's preference regarding attestation. Defaults to `.none`.
     ///   - publicKeyCredentialParameters: A list of public key algorithms the Relying Party chooses to restrict
     ///     support to. Defaults to all supported algorithms.
+    ///   - authenticatorSelection: The Relying Party's authenticator selection criteria that should be communicated to the client when choosing an authenticator to use.
+    ///     Defaults to `nil` (no requirements).
     /// - Returns: Registration options ready for the browser.
     public func beginRegistration(
         user: PublicKeyCredentialUserEntity,
         timeout: Duration? = .seconds(5*60),
         attestation: AttestationConveyancePreference = .none,
-        publicKeyCredentialParameters: [PublicKeyCredentialParameters] = .supported
+        publicKeyCredentialParameters: [PublicKeyCredentialParameters] = .supported,
+        authenticatorSelection: AuthenticatorSelection? = nil
     ) -> PublicKeyCredentialCreationOptions {
         let challenge = challengeGenerator.generate()
 
@@ -72,7 +75,8 @@ public struct WebAuthnManager: Sendable {
             relyingParty: .init(id: configuration.relyingPartyID, name: configuration.relyingPartyName),
             publicKeyCredentialParameters: publicKeyCredentialParameters,
             timeout: timeout,
-            attestation: attestation
+            attestation: attestation,
+            authenticatorSelection: authenticatorSelection
         )
     }
 
