@@ -43,4 +43,11 @@ public struct Credential: Sendable {
     public let attestationObject: AttestationObject
 
     public let attestationClientDataJSON: CollectedClientData
+
+    /// The Authenticator Attestation Globally Unique Identifier (AAGUID) from the attestation object.
+    /// Returns nil if attested credential data is not present.
+    /// - SeeAlso: [WebAuthn Level 3 Editor's Draft §6.5.1. Attested Credential Data](https://w3c.github.io/webauthn/#sctn-attested-credential-data)
+    public var aaguid: AAGUID? {
+        attestationObject.aaguid
+    }
 }
