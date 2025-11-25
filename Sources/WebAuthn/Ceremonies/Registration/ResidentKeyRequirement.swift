@@ -15,7 +15,7 @@ import Foundation
 
 /// The Relying Party's requirements regarding whether the authenticator should create a client-side-resident public key credential source.
 ///
-/// - SeeAlso: https://www.w3.org/TR/webauthn-2/#enumdef-residentkeyrequirement
+/// - SeeAlso: [WebAuthn Level 3 Working Draft §5.4.6. Resident Key Requirement Enumeration](https://www.w3.org/TR/webauthn-3/#enum-residentKeyRequirement)
 public struct ResidentKeyRequirement: UnreferencedStringEnumeration, Sendable {
     public var rawValue: String
     
@@ -24,13 +24,17 @@ public struct ResidentKeyRequirement: UnreferencedStringEnumeration, Sendable {
     }
     
     /// This value indicates the Relying Party requires a client-side-resident credential (i.e., a discoverable credential).
+    ///
     /// If the authenticator cannot create a client-side-resident credential, it will return an error.
+    /// - SeeAlso: [WebAuthn Level 3 Working Draft §5.4.6. Resident Key Requirement Enumeration](https://www.w3.org/TR/webauthn-3/#dom-residentkeyrequirement-required)
     public static let required: Self = "required"
     
     /// This value indicates the Relying Party strongly prefers a client-side-resident credential, but will accept a server-side credential.
+    /// - SeeAlso: [WebAuthn Level 3 Working Draft §5.4.6. Resident Key Requirement Enumeration](https://www.w3.org/TR/webauthn-3/#dom-residentkeyrequirement-preferred)
     public static let preferred: Self = "preferred"
     
     /// This value indicates the Relying Party strongly prefers a server-side credential, but will accept a client-side-resident credential.
+    /// - SeeAlso: [WebAuthn Level 3 Working Draft §5.4.6. Resident Key Requirement Enumeration](https://www.w3.org/TR/webauthn-3/#dom-residentkeyrequirement-discouraged)
     public static let discouraged: Self = "discouraged"
 }
 

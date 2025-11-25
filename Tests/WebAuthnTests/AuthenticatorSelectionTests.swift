@@ -107,6 +107,48 @@ struct AuthenticatorSelectionTests {
         #expect(jsonString.contains("platform"))
         #expect(jsonString.contains("required"))
         #expect(jsonString.contains("preferred"))
+        #expect(jsonString.contains("requireResidentKey"))
+        #expect(jsonString.contains("true"))
+    }
+    
+    @Test
+    func authenticatorSelectionEncodingWithRequireResidentKeyTrue() throws {
+        let selection = AuthenticatorSelection(
+            residentKey: .required
+        )
+        
+        let json = try JSONEncoder().encode(selection)
+        let jsonObject = try JSONSerialization.jsonObject(with: json) as! [String: Any]
+        
+        // When residentKey is .required, requireResidentKey should be true
+        #expect(jsonObject["residentKey"] as? String == "required")
+        #expect(jsonObject["requireResidentKey"] as? Bool == true)
+    }
+    
+    @Test
+    func authenticatorSelectionEncodingWithRequireResidentKeyFalse() throws {
+        let selection = AuthenticatorSelection(
+            residentKey: .preferred
+        )
+        
+        let json = try JSONEncoder().encode(selection)
+        let jsonObject = try JSONSerialization.jsonObject(with: json) as! [String: Any]
+        
+        // When residentKey is not .required, requireResidentKey should be false
+        #expect(jsonObject["residentKey"] as? String == "preferred")
+        #expect(jsonObject["requireResidentKey"] as? Bool == false)
+    }
+    
+    @Test
+    func authenticatorSelectionEncodingWithRequireResidentKeyFalseWhenNil() throws {
+        let selection = AuthenticatorSelection()
+        
+        let json = try JSONEncoder().encode(selection)
+        let jsonObject = try JSONSerialization.jsonObject(with: json) as! [String: Any]
+        
+        // When residentKey is nil, requireResidentKey should be false
+        #expect(jsonObject["residentKey"] == nil)
+        #expect(jsonObject["requireResidentKey"] as? Bool == false)
     }
     
     @Test
@@ -125,6 +167,63 @@ struct AuthenticatorSelectionTests {
         #expect(selection.authenticatorAttachment == .platform)
         #expect(selection.residentKey == .required)
         #expect(selection.userVerification == .preferred)
+    }
+    
+    @Test
+    func authenticatorSelectionDecodingWithRequireResidentKey() throws {
+        // requireResidentKey should be ignored during decoding - value comes from residentKey
+        let jsonString = """
+        {
+            "authenticatorAttachment": "platform",
+            "residentKey": "required",
+            "userVerification": "preferred",
+            "requireResidentKey": true
+        }
+        """
+        let json = jsonString.data(using: .utf8)!
+        
+        let selection = try JSONDecoder().decode(AuthenticatorSelection.self, from: json)
+        
+        #expect(selection.authenticatorAttachment == .platform)
+        #expect(selection.residentKey == .required)
+        #expect(selection.userVerification == .preferred)
+    }
+    
+    @Test
+    func authenticatorSelectionDecodingWithRequireResidentKeyMismatch() throws {
+        // requireResidentKey should be ignored even if it doesn't match residentKey
+        // The value should come from residentKey, not requireResidentKey
+        let jsonString = """
+        {
+            "residentKey": "preferred",
+            "requireResidentKey": true
+        }
+        """
+        let json = jsonString.data(using: .utf8)!
+        
+        let selection = try JSONDecoder().decode(AuthenticatorSelection.self, from: json)
+        
+        // Should decode based on residentKey, ignoring requireResidentKey
+        #expect(selection.residentKey == .preferred)
+    }
+    
+    @Test
+    func authenticatorSelectionDecodingWithoutRequireResidentKey() throws {
+        // Decoding should work fine without requireResidentKey present
+        let jsonString = """
+        {
+            "authenticatorAttachment": "cross-platform",
+            "residentKey": "discouraged",
+            "userVerification": "required"
+        }
+        """
+        let json = jsonString.data(using: .utf8)!
+        
+        let selection = try JSONDecoder().decode(AuthenticatorSelection.self, from: json)
+        
+        #expect(selection.authenticatorAttachment == .crossPlatform)
+        #expect(selection.residentKey == .discouraged)
+        #expect(selection.userVerification == .required)
     }
     
     @Test
@@ -236,6 +335,9 @@ struct AuthenticatorSelectionTests {
         #expect(jsonString.contains("required"))
         #expect(jsonString.contains("userVerification"))
         #expect(jsonString.contains("preferred"))
+        // When residentKey is .required, requireResidentKey should be present and true
+        #expect(jsonString.contains("requireResidentKey"))
+        #expect(jsonString.contains("true"))
     }
     
     @Test
@@ -257,6 +359,39 @@ struct AuthenticatorSelectionTests {
             "authenticatorSelection": {
                 "residentKey": "required",
                 "userVerification": "preferred"
+            }
+        }
+        """
+        let json = jsonString.data(using: .utf8)!
+        
+        let options = try JSONDecoder().decode(PublicKeyCredentialCreationOptions.self, from: json)
+        
+        #expect(options.authenticatorSelection != nil)
+        #expect(options.authenticatorSelection?.residentKey == .required)
+        #expect(options.authenticatorSelection?.userVerification == .preferred)
+    }
+    
+    @Test
+    func publicKeyCredentialCreationOptionsDecodingWithRequireResidentKey() throws {
+        // Should decode successfully with requireResidentKey present (backwards compatibility)
+        let jsonString = """
+        {
+            "challenge": "AQID",
+            "rp": {
+                "id": "example.com",
+                "name": "Example"
+            },
+            "user": {
+                "id": "AQID",
+                "name": "John",
+                "displayName": "Johnny"
+            },
+            "pubKeyCredParams": [{"type": "public-key", "alg": -7}],
+            "attestation": "none",
+            "authenticatorSelection": {
+                "residentKey": "required",
+                "userVerification": "preferred",
+                "requireResidentKey": true
             }
         }
         """

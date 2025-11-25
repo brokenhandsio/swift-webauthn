@@ -57,7 +57,7 @@ public struct WebAuthnManager: Sendable {
     ///   - attestation: The Relying Party's preference regarding attestation. Defaults to `.none`.
     ///   - publicKeyCredentialParameters: A list of public key algorithms the Relying Party chooses to restrict
     ///     support to. Defaults to all supported algorithms.
-    ///   - authenticatorSelection: A dictionary describing the Relying Party's requirements regarding authenticator attributes.
+    ///   - authenticatorSelection: The Relying Party's authenticator selection criteria that should be communicated to the client when choosing an authenticator to use.
     ///     Defaults to `nil` (no requirements).
     /// - Returns: Registration options ready for the browser.
     public func beginRegistration(
