@@ -100,15 +100,13 @@ struct AuthenticatorSelectionTests {
             userVerification: .preferred
         )
         
-        let json = try JSONEncoder().encode(selection)
-        let jsonString = String(data: json, encoding: .utf8)!
-        
-        // Verify all fields are present
-        #expect(jsonString.contains("platform"))
-        #expect(jsonString.contains("required"))
-        #expect(jsonString.contains("preferred"))
-        #expect(jsonString.contains("requireResidentKey"))
-        #expect(jsonString.contains("true"))
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        let json = try encoder.encode(selection)
+        let jsonString = String(decoding: json, as: UTF8.self)
+        #expect(
+            jsonString
+                == #"{"authenticatorAttachment":"platform","requireResidentKey":true,"residentKey":"required","userVerification":"preferred"}"#)
     }
     
     @Test

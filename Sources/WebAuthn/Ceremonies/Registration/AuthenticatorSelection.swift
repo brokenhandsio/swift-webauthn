@@ -16,7 +16,7 @@ import Foundation
 /// A dictionary describing the Relying Party's requirements regarding authenticator attributes.
 ///
 /// - SeeAlso: [WebAuthn Level 3 Working Draft §5.4.4. Authenticator Selection Criteria](https://www.w3.org/TR/webauthn-3/#dictionary-authenticatorSelection)
-public struct AuthenticatorSelection: Codable, Sendable, Hashable {
+public struct AuthenticatorSelection: Sendable, Hashable {
     /// If present, indicates the Relying Party's preference for authenticator attachment.
     /// - SeeAlso: [WebAuthn Level 3 Working Draft §5.4.4. Authenticator Selection Criteria](https://www.w3.org/TR/webauthn-3/#dom-authenticatorselectioncriteria-authenticatorattachment)
     public var authenticatorAttachment: AuthenticatorAttachment?
@@ -40,7 +40,7 @@ public struct AuthenticatorSelection: Codable, Sendable, Hashable {
     }
 }
 
-extension AuthenticatorSelection {
+extension AuthenticatorSelection: Codable {
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
