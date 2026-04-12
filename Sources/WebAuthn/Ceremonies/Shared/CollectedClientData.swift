@@ -11,7 +11,11 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 /// A parsed version of the `clientDataJSON` received from the authenticator. The `clientDataJSON` is a
 /// representation of the options we passed to the WebAuthn API (`.get()`/ `.create()`).

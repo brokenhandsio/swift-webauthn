@@ -11,7 +11,11 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 import Testing
 @testable import WebAuthn
 
@@ -457,4 +461,3 @@ struct AuthenticatorSelectionTests {
         #expect(options.user.id == user.id)
     }
 }
-

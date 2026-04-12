@@ -11,7 +11,11 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 import SwiftCBOR
 
 /// The response from the authenticator device for the creation of a new public key credential.

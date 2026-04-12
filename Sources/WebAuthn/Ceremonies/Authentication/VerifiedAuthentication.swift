@@ -11,7 +11,11 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 /// On successful authentication, this structure contains a summary of the authentication flow
 public struct VerifiedAuthentication: Sendable {

@@ -13,7 +13,11 @@
 
 @testable import WebAuthn
 import Testing
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 import SwiftCBOR
 import Crypto
 

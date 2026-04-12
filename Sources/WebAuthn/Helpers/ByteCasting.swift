@@ -11,7 +11,11 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension BidirectionalCollection where Element == UInt8 {
     /// Cast a byte sequence into a trivial type like a primitive or a tuple of primitives.
