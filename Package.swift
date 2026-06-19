@@ -23,7 +23,7 @@ let package = Package(
         .library(name: "WebAuthn", targets: ["WebAuthn"])
     ],
     dependencies: [
-        .package(url: "https://github.com/unrelentingtech/SwiftCBOR.git", from: "0.4.7"),
+        .package(url: "https://github.com/edgeengineer/cbor", from: "0.0.6"),
         .package(url: "https://github.com/apple/swift-crypto.git", "3.8.1" ..< "5.0.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
         .package(url: "https://github.com/swiftlang/swift-docc-plugin.git", from: "1.1.0")
@@ -32,7 +32,7 @@ let package = Package(
         .target(
             name: "WebAuthn",
             dependencies: [
-                "SwiftCBOR",
+                .product(name: "CBOR", package: "cbor"),
                 .product(name: "Crypto", package: "swift-crypto"),
                 .product(name: "_CryptoExtras", package: "swift-crypto"),
                 .product(name: "Logging", package: "swift-log"),

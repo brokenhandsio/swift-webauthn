@@ -13,7 +13,7 @@
 
 import Foundation
 import Crypto
-import SwiftCBOR
+import CBOR
 
 /// Data created and/ or used by the authenticator during authentication/ registration.
 /// The data contains, for example, whether a user was present or verified.
@@ -102,13 +102,12 @@ extension AuthenticatorData {
         let credentialID = data[55..<credentialIDEndIndex]
 
         /// **credentialPublicKey** (variable): The credential public key encoded in `COSE_Key` format, as defined in [Section 7](https://tools.ietf.org/html/rfc9052#section-7) of [RFC9052], using the CTAP2 canonical CBOR encoding form.
-        /// Assuming valid CBOR, verify the public key's length by decoding the next CBOR item, and checking how much data is left on the stream.
-        let inputStream = ByteInputStream(data[credentialIDEndIndex...])
+        /// Assuming valid CBOR, verify the public key's length by measuring the next CBOR item, and checking how much data is left.
+        let publicKeyLength: Int
         do {
-            let decoder = CBORDecoder(stream: inputStream, options: CBOROptions(maximumDepth: 16))
-            _ = try decoder.decodeItem()
+            publicKeyLength = try cborFirstItemLength(data[credentialIDEndIndex...])
         } catch { throw .invalidPublicKeyLength }
-        let publicKeyBytes = data[credentialIDEndIndex..<(data.count - inputStream.remainingBytes)]
+        let publicKeyBytes = data[credentialIDEndIndex..<(credentialIDEndIndex + publicKeyLength)]
 
         let data = AttestedCredentialData(
             authenticatorAttestationGUID: aaguid,
@@ -120,29 +119,5 @@ extension AuthenticatorData {
         let length = AAGUID.size + 2 + data.credentialID.count + data.publicKey.count
 
         return (data, length)
-    }
-}
-
-/// A helper type to determine how many bytes were consumed when decoding CBOR items.
-class ByteInputStream: CBORInputStream {
-    private var slice : ArraySlice<UInt8>
-    
-    init(_ slice: ArraySlice<UInt8>) {
-        self.slice = slice
-    }
-    
-    /// The remaining bytes in the original data buffer.
-    var remainingBytes: Int { slice.count }
-    
-    func popByte() throws(CBORError) -> UInt8 {
-        if slice.count < 1 { throw .unfinishedSequence }
-        return slice.removeFirst()
-    }
-    
-    func popBytes(_ n: Int) throws(CBORError) -> ArraySlice<UInt8> {
-        if slice.count < n { throw .unfinishedSequence }
-        let result = slice.prefix(n)
-        slice = slice.dropFirst(n)
-        return result
     }
 }

@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftCBOR
+import CBOR
 
 enum COSEKey: Sendable {
     // swiftlint:disable identifier_name
@@ -49,7 +49,8 @@ enum COSEKey: Sendable {
             value = -2
         }
         if value < 0 {
-            return .negativeInt(UInt64(abs(-1 - value)))
+            // edgeengineer/cbor stores the actual negative value in `.negativeInt`.
+            return .negativeInt(Int64(value))
         } else {
             return .unsignedInt(UInt64(value))
         }

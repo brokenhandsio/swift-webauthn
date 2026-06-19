@@ -12,7 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import SwiftCBOR
+import CBOR
 
 /// The response from the authenticator device for the creation of a new public key credential.
 ///
@@ -62,27 +62,26 @@ struct ParsedAuthenticatorAttestationResponse {
 
         // Step 11. (assembling attestationObject)
         let attestationObjectData = Data(rawResponse.attestationObject)
-        guard let decodedAttestationObject = try? CBOR.decode([UInt8](attestationObjectData), options: CBOROptions(maximumDepth: 16)) else {
+        guard let decodedAttestationObject = try? decodeCBOR([UInt8](attestationObjectData)) else {
             throw WebAuthnError.invalidAttestationObject
         }
+        let attestationObjectMap = CBORMap(decodedAttestationObject)
 
-        guard let authData = decodedAttestationObject["authData"],
-            case let .byteString(authDataBytes) = authData else {
+        guard let authenticatorDataBytes = attestationObjectMap["authData"]?.byteStringValue() else {
             throw WebAuthnError.invalidAuthData
         }
-        guard let formatCBOR = decodedAttestationObject["fmt"],
-            case let .utf8String(format) = formatCBOR else {
+        guard let format = attestationObjectMap["fmt"]?.stringValue else {
             throw WebAuthnError.invalidFmt
         }
         let attestationFormat = AttestationFormat(format)
 
-        guard let attestationStatement = decodedAttestationObject["attStmt"] else {
+        guard let attestationStatement = attestationObjectMap["attStmt"] else {
             throw WebAuthnError.missingAttStmt
         }
 
         attestationObject = AttestationObject(
-            authenticatorData: try AuthenticatorData(bytes: authDataBytes),
-            rawAuthenticatorData: authDataBytes,
+            authenticatorData: try AuthenticatorData(bytes: authenticatorDataBytes),
+            rawAuthenticatorData: authenticatorDataBytes,
             format: attestationFormat,
             attestationStatement: attestationStatement
         )

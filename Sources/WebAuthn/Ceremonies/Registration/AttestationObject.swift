@@ -13,7 +13,7 @@
 
 import Foundation
 import Crypto
-@preconcurrency import SwiftCBOR
+import CBOR
 
 /// Contains the cryptographic attestation that a new key pair was created by that authenticator.
 public struct AttestationObject: Sendable {
@@ -65,8 +65,10 @@ public struct AttestationObject: Sendable {
         // let pemRootCertificates = pemRootCertificatesByFormat[format] ?? []
         switch format {
         case .none:
-            // if format is `none` statement must be empty
-            guard attestationStatement == .map([:]) else {
+            // if format is `none` the statement must be an empty map
+            guard case .map = attestationStatement,
+                  let attestationStatementPairs = try? attestationStatement.mapValue(),
+                  attestationStatementPairs.isEmpty else {
                 throw WebAuthnError.attestationStatementMustBeEmpty
             }
         // case .packed:

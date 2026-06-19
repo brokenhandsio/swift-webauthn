@@ -13,7 +13,7 @@
 
 @testable import WebAuthn
 import Testing
-import SwiftCBOR
+import CBOR
 
 struct WebAuthnManagerRegistrationTests {
     var webAuthnManager: WebAuthnManager!
@@ -322,7 +322,7 @@ struct WebAuthnManagerRegistrationTests {
             try await finishRegistration(
                 attestationObject: keyConfiguration.attestationObjectBuilder
                     .fmt("none")
-                    .attStmt(.double(123))
+                    .attStmt(.float(123))
                     .build()
                     .cborEncoded,
                 requireUserVerification: true

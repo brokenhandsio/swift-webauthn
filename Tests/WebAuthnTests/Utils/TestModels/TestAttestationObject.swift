@@ -12,7 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 import WebAuthn
-@preconcurrency import SwiftCBOR
+import CBOR
 import Testing
 
 // protocol AttestationObjectParameter: CBOR {}
@@ -29,22 +29,22 @@ struct TestAttestationObject {
     }
 
     var cborEncoded: [UInt8] {
-        var attestationObject: [CBOR: CBOR] = [:]
+        var pairs: [CBORMapPair] = []
         if let fmt {
-            attestationObject[.utf8String("fmt")] = fmt
+            pairs.append(CBORMapPair(key: .textString("fmt"), value: fmt))
         }
         if let attStmt {
-            attestationObject[.utf8String("attStmt")] = attStmt
+            pairs.append(CBORMapPair(key: .textString("attStmt"), value: attStmt))
         }
         switch authData {
         case .structured(let authData):
-            attestationObject[.utf8String("authData")] = .byteString(authData.byteArrayRepresentation)
+            pairs.append(CBORMapPair(key: .textString("authData"), value: .byteString(ArraySlice(authData.byteArrayRepresentation))))
         case .cbor(let authData):
-            attestationObject[.utf8String("authData")] = authData
+            pairs.append(CBORMapPair(key: .textString("authData"), value: authData))
         case .none: break
         }
 
-        return [UInt8](CBOR.map(attestationObject).encode())
+        return [UInt8](CBOR.map(pairs).encode())
     }
 }
 
@@ -57,8 +57,8 @@ struct TestAttestationObjectBuilder {
 
     func keyAgnosticBase() -> Self {
         var temp = self
-        temp.wrapped.fmt = .utf8String("none")
-        temp.wrapped.attStmt = .map([:])
+        temp.wrapped.fmt = .textString("none")
+        temp.wrapped.attStmt = .map([CBORMapPair]())
         return temp
     }
 
@@ -86,13 +86,13 @@ struct TestAttestationObjectBuilder {
 
     func invalidFmt() -> Self {
         var temp = self
-        temp.wrapped.fmt = .double(1)
+        temp.wrapped.fmt = .float(1)
         return temp
     }
 
-    func fmt(_ utf8String: String) -> Self {
+    func fmt(_ textString: String) -> Self {
         var temp = self
-        temp.wrapped.fmt = .utf8String(utf8String)
+        temp.wrapped.fmt = .textString(textString)
         return temp
     }
 
@@ -100,7 +100,7 @@ struct TestAttestationObjectBuilder {
 
     func invalidAttStmt() -> Self {
         var temp = self
-        temp.wrapped.attStmt = .double(1)
+        temp.wrapped.attStmt = .float(1)
         return temp
     }
 
@@ -112,7 +112,7 @@ struct TestAttestationObjectBuilder {
 
     func emptyAttStmt() -> Self {
         var temp = self
-        temp.wrapped.attStmt = .map([:])
+        temp.wrapped.attStmt = .map([CBORMapPair]())
         return temp
     }
 
@@ -126,19 +126,19 @@ struct TestAttestationObjectBuilder {
 
     func invalidAuthData() -> Self {
         var temp = self
-        temp.wrapped.authData = .cbor(.double(1))
+        temp.wrapped.authData = .cbor(.float(1))
         return temp
     }
 
     func emptyAuthData() -> Self {
         var temp = self
-        temp.wrapped.authData = .cbor(.byteString([]))
+        temp.wrapped.authData = .cbor(.byteString(ArraySlice<UInt8>()))
         return temp
     }
 
     func zeroAuthData(byteCount: Int) -> Self {
         var temp = self
-        temp.wrapped.authData = .cbor(.byteString([UInt8](repeating: 0, count: byteCount)))
+        temp.wrapped.authData = .cbor(.byteString(ArraySlice(repeating: 0, count: byteCount)))
         return temp
     }
 

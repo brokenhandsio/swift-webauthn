@@ -12,7 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 @testable import WebAuthn
-@preconcurrency import SwiftCBOR
+import CBOR
 
 struct TestCredentialPublicKey {
     var kty: CBOR?
@@ -29,32 +29,32 @@ struct TestCredentialPublicKey {
     var eCoordinate: CBOR?
 
     var byteArrayRepresentation: [UInt8] {
-        var value: [CBOR: CBOR] = [:]
+        var pairs: [CBORMapPair] = []
         if let kty {
-            value[COSEKey.kty.cbor] = kty
+            pairs.append(CBORMapPair(key: COSEKey.kty.cbor, value: kty))
         }
         if let alg {
-            value[COSEKey.alg.cbor] = alg
+            pairs.append(CBORMapPair(key: COSEKey.alg.cbor, value: alg))
         }
         if let crv {
-            value[COSEKey.crv.cbor] = crv
+            pairs.append(CBORMapPair(key: COSEKey.crv.cbor, value: crv))
         }
         if let xCoordinate {
-            value[COSEKey.x.cbor] = xCoordinate
+            pairs.append(CBORMapPair(key: COSEKey.x.cbor, value: xCoordinate))
         }
         if let yCoordinate {
-            value[COSEKey.y.cbor] = yCoordinate
+            pairs.append(CBORMapPair(key: COSEKey.y.cbor, value: yCoordinate))
         }
-        
+
         if let nCoordinate {
-            value[COSEKey.n.cbor] = nCoordinate
+            pairs.append(CBORMapPair(key: COSEKey.n.cbor, value: nCoordinate))
         }
 
         if let eCoordinate {
-            value[COSEKey.e.cbor] = eCoordinate
+            pairs.append(CBORMapPair(key: COSEKey.e.cbor, value: eCoordinate))
         }
 
-        return CBOR.map(value).encode()
+        return CBOR.map(pairs).encode()
     }
 }
 
@@ -101,31 +101,31 @@ struct TestCredentialPublicKeyBuilder {
 
     func alg(_ alg: COSEAlgorithmIdentifier) -> Self {
         var temp = self
-        temp.wrapped.alg = .negativeInt(UInt64(abs(alg.rawValue) - 1))
+        temp.wrapped.alg = .negativeInt(Int64(alg.rawValue))
         return temp
     }
 
     func xCoordinate(_ xCoordinate: [UInt8]) -> Self {
         var temp = self
-        temp.wrapped.xCoordinate = .byteString(xCoordinate)
+        temp.wrapped.xCoordinate = .byteString(ArraySlice(xCoordinate))
         return temp
     }
 
     func yCoordiante(_ yCoordinate: [UInt8]) -> Self {
         var temp = self
-        temp.wrapped.yCoordinate = .byteString(yCoordinate)
+        temp.wrapped.yCoordinate = .byteString(ArraySlice(yCoordinate))
         return temp
     }
-    
+
     func nCoordinate(_ nCoordinate: [UInt8]) -> Self {
         var temp = self
-        temp.wrapped.nCoordinate = .byteString(nCoordinate)
+        temp.wrapped.nCoordinate = .byteString(ArraySlice(nCoordinate))
         return temp
     }
 
     func eCoordiante(_ eCoordinate: [UInt8]) -> Self {
         var temp = self
-        temp.wrapped.eCoordinate = .byteString(eCoordinate)
+        temp.wrapped.eCoordinate = .byteString(ArraySlice(eCoordinate))
         return temp
     }
 }

@@ -14,7 +14,6 @@
 @testable import WebAuthn
 import Testing
 import Foundation
-import SwiftCBOR
 import Crypto
 
 struct WebAuthnManagerAuthenticationTests {
