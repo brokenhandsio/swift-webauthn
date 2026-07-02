@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.3
 //===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift WebAuthn open source project
@@ -14,10 +14,28 @@
 
 import PackageDescription
 
+let extraSettings: [SwiftSetting] = [
+    .strictMemorySafety(),
+    .enableExperimentalFeature("SuppressedAssociatedTypesWithDefaults"),
+    .enableExperimentalFeature("LifetimeDependence"),
+    .enableExperimentalFeature("Lifetimes"),
+    .enableUpcomingFeature("LifetimeDependence"),
+    .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+    .enableUpcomingFeature("InferIsolatedConformances"),
+    .enableUpcomingFeature("ExistentialAny"),
+    .enableUpcomingFeature("MemberImportVisibility"),
+    .enableUpcomingFeature("InternalImportsByDefault"),
+]
+
 let package = Package(
     name: "swift-webauthn",
     platforms: [
-        .macOS(.v13)
+        .macOS(.v26),
+        .iOS(.v26),
+        .tvOS(.v26),
+        .macCatalyst(.v26),
+        .visionOS(.v26),
+        .watchOS(.v26),
     ],
     products: [
         .library(name: "WebAuthn", targets: ["WebAuthn"])
