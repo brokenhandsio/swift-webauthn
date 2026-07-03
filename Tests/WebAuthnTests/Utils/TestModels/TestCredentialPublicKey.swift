@@ -12,7 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 @testable import WebAuthn
-@preconcurrency import SwiftCBOR
+@unsafe @preconcurrency import SwiftCBOR
 
 struct TestCredentialPublicKey {
     var kty: CBOR?

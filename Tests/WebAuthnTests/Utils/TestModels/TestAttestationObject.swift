@@ -12,7 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 import WebAuthn
-@preconcurrency import SwiftCBOR
+@unsafe @preconcurrency import SwiftCBOR
 import Testing
 
 // protocol AttestationObjectParameter: CBOR {}
