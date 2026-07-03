@@ -54,7 +54,8 @@ let package = Package(
                 .product(name: "Crypto", package: "swift-crypto"),
                 .product(name: "_CryptoExtras", package: "swift-crypto"),
                 .product(name: "Logging", package: "swift-log"),
-            ]
+            ],
+            swiftSettings: extraSettings
         ),
         .testTarget(
             name: "WebAuthnTests",
@@ -62,7 +63,8 @@ let package = Package(
                 .target(name: "WebAuthn"),
                 .product(name: "Crypto", package: "swift-crypto"),
                 .product(name: "_CryptoExtras", package: "swift-crypto"),
-            ]
+            ],
+            swiftSettings: extraSettings
         )
     ]
 )
