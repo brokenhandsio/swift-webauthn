@@ -17,7 +17,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import Crypto
-@preconcurrency import SwiftCBOR
+@unsafe @preconcurrency import SwiftCBOR
 
 /// Contains the cryptographic attestation that a new key pair was created by that authenticator.
 public struct AttestationObject: Sendable {

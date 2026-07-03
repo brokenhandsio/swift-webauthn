@@ -31,7 +31,7 @@ enum CredentialPublicKey: Sendable {
     case ec2(EC2PublicKey)
     case rsa(RSAPublicKeyData)
 
-    var key: PublicKey {
+    var key: any PublicKey {
         switch self {
         case let .okp(key):
             return key
