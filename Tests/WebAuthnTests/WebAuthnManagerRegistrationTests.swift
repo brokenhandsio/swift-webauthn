@@ -13,7 +13,7 @@
 
 @testable import WebAuthn
 import Testing
-import SwiftCBOR
+import CBOR
 
 struct WebAuthnManagerRegistrationTests {
     var webAuthnManager: WebAuthnManager!

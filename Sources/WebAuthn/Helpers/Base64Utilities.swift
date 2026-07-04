@@ -12,9 +12,9 @@
 //===----------------------------------------------------------------------===//
 
 #if canImport(FoundationEssentials)
-import FoundationEssentials
+public import FoundationEssentials
 #else
-import Foundation
+public import Foundation
 #endif
 import Logging
 
@@ -78,12 +78,12 @@ public struct URLEncodedBase64: ExpressibleByStringLiteral, Codable, Hashable, E
         self.init(value)
     }
 
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
         self.base64URL = try container.decode(String.self)
     }
 
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(self.base64URL)
     }
@@ -107,14 +107,14 @@ extension Array where Element == UInt8 {
     /// Encodes an array of bytes into a base64url-encoded string
     /// - Returns: A base64url-encoded string
     public func base64URLEncodedString() -> URLEncodedBase64 {
-        let base64String = Data(bytes: self, count: self.count).base64EncodedString()
+        let base64String = unsafe Data(bytes: self, count: self.count).base64EncodedString()
         return EncodedBase64(base64String).urlEncoded
     }
 
     /// Encodes an array of bytes into a base64 string
     /// - Returns: A base64-encoded string
     public func base64EncodedString() -> EncodedBase64 {
-        return .init(Data(bytes: self, count: self.count).base64EncodedString())
+        return unsafe .init(Data(bytes: self, count: self.count).base64EncodedString())
     }
 }
 
