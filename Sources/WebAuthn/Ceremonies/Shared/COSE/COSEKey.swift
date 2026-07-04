@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftCBOR
+import CBOR
 
 enum COSEKey: Sendable {
     // swiftlint:disable identifier_name
