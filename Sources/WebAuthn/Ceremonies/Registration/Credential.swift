@@ -48,6 +48,26 @@ public struct Credential: Sendable {
 
     public let attestationClientDataJSON: CollectedClientData
 
+    public init(
+        type: CredentialType,
+        id: String,
+        publicKey: [UInt8],
+        signCount: UInt32,
+        backupEligible: Bool,
+        isBackedUp: Bool,
+        attestationObject: AttestationObject,
+        attestationClientDataJSON: CollectedClientData
+    ) {
+        self.type = type
+        self.id = id
+        self.publicKey = publicKey
+        self.signCount = signCount
+        self.backupEligible = backupEligible
+        self.isBackedUp = isBackedUp
+        self.attestationObject = attestationObject
+        self.attestationClientDataJSON = attestationClientDataJSON
+    }
+
     /// The Authenticator Attestation Globally Unique Identifier (AAGUID) from the attestation object.
     /// Returns nil if attested credential data is not present.
     /// - SeeAlso: [WebAuthn Level 3 Editor's Draft §6.5.1. Attested Credential Data](https://w3c.github.io/webauthn/#sctn-attested-credential-data)

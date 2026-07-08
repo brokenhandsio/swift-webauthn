@@ -38,4 +38,16 @@ public struct VerifiedAuthentication: Sendable {
     public let credentialDeviceType: CredentialDeviceType
     /// Whether the authenticator is known to be backed up currently
     public let credentialBackedUp: Bool
+
+    public init(
+        credentialID: URLEncodedBase64,
+        newSignCount: UInt32,
+        credentialDeviceType: CredentialDeviceType,
+        credentialBackedUp: Bool
+    ) {
+        self.credentialID = credentialID
+        self.newSignCount = newSignCount
+        self.credentialDeviceType = credentialDeviceType
+        self.credentialBackedUp = credentialBackedUp
+    }
 }

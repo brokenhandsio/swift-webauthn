@@ -20,7 +20,12 @@ import Testing
 @testable import WebAuthn
 
 struct AuthenticatorSelectionTests {
-    
+
+    private struct EncodedAuthenticatorSelection: Decodable {
+        let residentKey: String?
+        let requireResidentKey: Bool?
+    }
+
     // MARK: - ResidentKeyRequirement Tests
     
     @Test
@@ -120,11 +125,11 @@ struct AuthenticatorSelectionTests {
         )
         
         let json = try JSONEncoder().encode(selection)
-        let jsonObject = try JSONSerialization.jsonObject(with: json) as! [String: Any]
-        
+        let jsonObject = try JSONDecoder().decode(EncodedAuthenticatorSelection.self, from: json)
+
         // When residentKey is .required, requireResidentKey should be true
-        #expect(jsonObject["residentKey"] as? String == "required")
-        #expect(jsonObject["requireResidentKey"] as? Bool == true)
+        #expect(jsonObject.residentKey == "required")
+        #expect(jsonObject.requireResidentKey == true)
     }
     
     @Test
@@ -134,11 +139,11 @@ struct AuthenticatorSelectionTests {
         )
         
         let json = try JSONEncoder().encode(selection)
-        let jsonObject = try JSONSerialization.jsonObject(with: json) as! [String: Any]
-        
+        let jsonObject = try JSONDecoder().decode(EncodedAuthenticatorSelection.self, from: json)
+
         // When residentKey is not .required, requireResidentKey should be false
-        #expect(jsonObject["residentKey"] as? String == "preferred")
-        #expect(jsonObject["requireResidentKey"] as? Bool == false)
+        #expect(jsonObject.residentKey == "preferred")
+        #expect(jsonObject.requireResidentKey == false)
     }
     
     @Test
@@ -146,11 +151,11 @@ struct AuthenticatorSelectionTests {
         let selection = AuthenticatorSelection()
         
         let json = try JSONEncoder().encode(selection)
-        let jsonObject = try JSONSerialization.jsonObject(with: json) as! [String: Any]
-        
+        let jsonObject = try JSONDecoder().decode(EncodedAuthenticatorSelection.self, from: json)
+
         // When residentKey is nil, requireResidentKey should be false
-        #expect(jsonObject["residentKey"] == nil)
-        #expect(jsonObject["requireResidentKey"] as? Bool == false)
+        #expect(jsonObject.residentKey == nil)
+        #expect(jsonObject.requireResidentKey == false)
     }
     
     @Test
