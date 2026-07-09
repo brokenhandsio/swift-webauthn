@@ -95,6 +95,7 @@ struct ParsedCredentialCreationResponse {
     func verify(
         storedChallenge: [UInt8],
         verifyUser: Bool,
+        requireUserPresence: Bool,
         relyingPartyID: String,
         relyingPartyOrigin: String,
         supportedPublicKeyAlgorithms: [PublicKeyCredentialParameters],
@@ -116,6 +117,7 @@ struct ParsedCredentialCreationResponse {
         let attestedCredentialData = try await response.attestationObject.verify(
             relyingPartyID: relyingPartyID,
             verificationRequired: verifyUser,
+            requireUserPresence: requireUserPresence,
             clientDataHash: hash,
             supportedPublicKeyAlgorithms: supportedPublicKeyAlgorithms,
             pemRootCertificatesByFormat: pemRootCertificatesByFormat
