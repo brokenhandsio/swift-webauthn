@@ -107,14 +107,14 @@ extension Array where Element == UInt8 {
     /// Encodes an array of bytes into a base64url-encoded string
     /// - Returns: A base64url-encoded string
     public func base64URLEncodedString() -> URLEncodedBase64 {
-        let base64String = unsafe Data(bytes: self, count: self.count).base64EncodedString()
+        let base64String = Data(self).base64EncodedString()
         return EncodedBase64(base64String).urlEncoded
     }
 
     /// Encodes an array of bytes into a base64 string
     /// - Returns: A base64-encoded string
     public func base64EncodedString() -> EncodedBase64 {
-        return unsafe .init(Data(bytes: self, count: self.count).base64EncodedString())
+        return .init(Data(self).base64EncodedString())
     }
 }
 

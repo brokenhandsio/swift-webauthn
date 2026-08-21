@@ -91,9 +91,7 @@ extension AuthenticatorData {
         else { throw .attestedCredentialDataMissing }
 
         /// **credentialIdLength** (2): Byte length L of credentialId, 16-bit unsigned big-endian integer. Value MUST be ≤ 1023.
-        let idLengthBytes = data[53..<55]  // Length is 2 bytes
-        let idLengthData = Data(idLengthBytes)
-        let idLength = UInt16(bigEndianBytes: idLengthData)
+        let idLength = UInt16(bigEndianBytes: data[53..<55])  // 2-byte big-endian length
 
         guard idLength <= 1023
         else { throw .credentialIDTooLong }
