@@ -33,6 +33,13 @@ public struct RegistrationCredential: Sendable {
 
     /// The attestation response from the authenticator.
     public let attestationResponse: AuthenticatorAttestationResponse
+    
+	public init(id: URLEncodedBase64, type: CredentialType, rawID: [UInt8], attestationResponse: AuthenticatorAttestationResponse) {
+		self.id = id
+		self.type = type
+		self.rawID = rawID
+		self.attestationResponse = attestationResponse
+	}
 }
 
 extension RegistrationCredential: Codable {
