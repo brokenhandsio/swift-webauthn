@@ -11,6 +11,11 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 @testable import WebAuthn
 import Testing
 import SwiftCBOR
@@ -30,6 +35,27 @@ struct WebAuthnManagerRegistrationTests {
             relyingPartyOrigin: relyingPartyOrigin
         )
         webAuthnManager = .init(configuration: configuration, challengeGenerator: .mock(generate: challenge))
+    }
+
+    @Test
+    func registrationCredentialIsCodable() async throws {
+        let json = """
+            {
+              "type": "public-key",
+              "rawId": "AQEBAQEBAQEBAQ",
+              "response": {
+                "clientDataJSON": "eyJyYW5kb21PdGhlcktleSI6IjEyMyIsInR5cGUiOiJ3ZWJhdXRobi5jcmVhdGUiLCJjcm9zc09yaWdpbiI6ZmFsc2UsIm9yaWdpbiI6Imh0dHBzOlwvXC9leGFtcGxlLmNvbSIsImNoYWxsZW5nZSI6IkFBQUFBQUEifQ",
+                "attestationObject": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YViFo3mm9u6vuaVeN4wRgDTidR5oL6ufLTCrE9ISVYbOGUdFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQGlAQIDJiABIVggliG0CSKktS9RPBtmebjUj4EBmXLH88ZNbIVt405FpkUiWCBmNzEq_grpor7Ai89GEeDpCB5vEgMRqJhmBdXTtLJI-A"
+              },
+              "id": "AQEBAQEBAQEBAQ"
+            }
+            """.utf8
+        let sut = try JSONDecoder().decode(RegistrationCredential.self, from: Data(json))
+        let data = try JSONEncoder().encode(sut)
+
+        #expect(throws: Never.self, "All RegistrationCredential's properties were encoded") {
+            try JSONDecoder().decode(RegistrationCredential.self, from: data)
+        }
     }
 
     // MARK: - beginRegistration()
