@@ -40,4 +40,41 @@ struct HelpersTests {
         let decodedBase64 = try JSONDecoder().decode(EncodedBase64.self, from: json)
         #expect(base64 == decodedBase64)
     }
+    @Test(arguments: [
+        ([UInt8](), "", ""),
+        ([UInt8(0xfb)], "+w==", "-w"),
+        ([UInt8(0xfb), 0xff], "+/8=", "-_8"),
+        ([UInt8(0xfb), 0xff, 0xff], "+///", "-___"),
+    ])
+    func base64URLAlphabetAndPaddingRoundTrip(vector: ([UInt8], String, String)) {
+        let (bytes, base64, base64URL) = vector
+        #expect(EncodedBase64(base64).urlEncoded.asString() == base64URL)
+        #expect(URLEncodedBase64(base64URL).urlDecoded.asString() == base64)
+        #expect(URLEncodedBase64(base64URL).decodedBytes == bytes)
+    }
+    @Test
+    func hexadecimalUsesLowercaseAndLeadingZeros() {
+        #expect(Data([0, 15, 16, 255]).hexadecimal == "000f10ff")
+    }
+    @Test
+    func base64AlphabetTranslationPreservesCombinedCharacters() {
+        let base64 = "é+\u{0301}/=\u{0301}🧖"
+        let expectedURL = "é+\u{0301}_=\u{0301}🧖"
+        #expect(Array(EncodedBase64(base64).urlEncoded.asString().utf8) == Array(expectedURL.utf8))
+
+        let base64URL = "é-\u{0301}_=\u{0301}🧖"
+        let expectedBase64 = "é-\u{0301}/=\u{0301}🧖==="
+        #expect(Array(URLEncodedBase64(base64URL).urlDecoded.asString().utf8) == Array(expectedBase64.utf8))
+    }
+    @Test(arguments: ["!", "AA?A", "é-_🧖"])
+    func base64URLDecodingRejectsMalformedInput(input: String) {
+        #expect(URLEncodedBase64(input).decodedBytes == nil)
+    }
+    @Test
+    func base64URLDecodingUsesDataValidationForShortInput() {
+        let encoded = URLEncodedBase64("A")
+        #expect(encoded.urlDecoded.asString() == "A===")
+        #expect(encoded.decodedBytes == Data(base64Encoded: "A===").map(Array.init))
+    }
+
 }

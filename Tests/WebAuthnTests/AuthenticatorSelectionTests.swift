@@ -119,12 +119,11 @@ struct AuthenticatorSelectionTests {
             residentKey: .required
         )
         
-        let json = try JSONEncoder().encode(selection)
-        let jsonObject = try JSONSerialization.jsonObject(with: json) as! [String: Any]
-        
-        // When residentKey is .required, requireResidentKey should be true
-        #expect(jsonObject["residentKey"] as? String == "required")
-        #expect(jsonObject["requireResidentKey"] as? Bool == true)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        let json = try encoder.encode(selection)
+        let jsonString = String(decoding: json, as: UTF8.self)
+        #expect(jsonString == #"{"requireResidentKey":true,"residentKey":"required"}"#)
     }
     
     @Test
@@ -133,24 +132,22 @@ struct AuthenticatorSelectionTests {
             residentKey: .preferred
         )
         
-        let json = try JSONEncoder().encode(selection)
-        let jsonObject = try JSONSerialization.jsonObject(with: json) as! [String: Any]
-        
-        // When residentKey is not .required, requireResidentKey should be false
-        #expect(jsonObject["residentKey"] as? String == "preferred")
-        #expect(jsonObject["requireResidentKey"] as? Bool == false)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        let json = try encoder.encode(selection)
+        let jsonString = String(decoding: json, as: UTF8.self)
+        #expect(jsonString == #"{"requireResidentKey":false,"residentKey":"preferred"}"#)
     }
     
     @Test
     func authenticatorSelectionEncodingWithRequireResidentKeyFalseWhenNil() throws {
         let selection = AuthenticatorSelection()
         
-        let json = try JSONEncoder().encode(selection)
-        let jsonObject = try JSONSerialization.jsonObject(with: json) as! [String: Any]
-        
-        // When residentKey is nil, requireResidentKey should be false
-        #expect(jsonObject["residentKey"] == nil)
-        #expect(jsonObject["requireResidentKey"] as? Bool == false)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        let json = try encoder.encode(selection)
+        let jsonString = String(decoding: json, as: UTF8.self)
+        #expect(jsonString == #"{"requireResidentKey":false}"#)
     }
     
     @Test
