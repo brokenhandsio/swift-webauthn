@@ -57,11 +57,14 @@ struct HelpersTests {
         #expect(Data([0, 15, 16, 255]).hexadecimal == "000f10ff")
     }
     @Test
-    func base64AlphabetTranslationPreservesUnrelatedUTF8Bytes() {
+    func base64AlphabetTranslationPreservesCombinedCharacters() {
         let base64 = "é+\u{0301}/=\u{0301}🧖"
-        let base64URL = "é-\u{0301}_\u{0301}🧖"
-        #expect(Array(EncodedBase64(base64).urlEncoded.asString().utf8) == Array(base64URL.utf8))
-        #expect(Array(URLEncodedBase64(base64URL).urlDecoded.asString().utf8) == Array("é+\u{0301}/\u{0301}🧖".utf8))
+        let expectedURL = "é+\u{0301}_=\u{0301}🧖"
+        #expect(Array(EncodedBase64(base64).urlEncoded.asString().utf8) == Array(expectedURL.utf8))
+
+        let base64URL = "é-\u{0301}_=\u{0301}🧖"
+        let expectedBase64 = "é-\u{0301}/=\u{0301}🧖==="
+        #expect(Array(URLEncodedBase64(base64URL).urlDecoded.asString().utf8) == Array(expectedBase64.utf8))
     }
     @Test(arguments: ["!", "A", "AA?A", "é-_🧖"])
     func base64URLDecodingRejectsMalformedInput(input: String) {
