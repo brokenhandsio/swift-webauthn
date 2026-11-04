@@ -66,9 +66,15 @@ struct HelpersTests {
         let expectedBase64 = "é-\u{0301}/=\u{0301}🧖==="
         #expect(Array(URLEncodedBase64(base64URL).urlDecoded.asString().utf8) == Array(expectedBase64.utf8))
     }
-    @Test(arguments: ["!", "A", "AA?A", "é-_🧖"])
+    @Test(arguments: ["!", "AA?A", "é-_🧖"])
     func base64URLDecodingRejectsMalformedInput(input: String) {
         #expect(URLEncodedBase64(input).decodedBytes == nil)
+    }
+    @Test
+    func base64URLDecodingUsesDataValidationForShortInput() {
+        let encoded = URLEncodedBase64("A")
+        #expect(encoded.urlDecoded.asString() == "A===")
+        #expect(encoded.decodedBytes == Data(base64Encoded: "A===").map(Array.init))
     }
 
 }
