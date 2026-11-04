@@ -38,7 +38,9 @@ extension String {
 
 extension Data {
     var hexadecimal: String {
-        return map { String(format: "%02x", $0) }
-            .joined()
+        return map { byte in
+            let hex = String(byte, radix: 16)
+            return hex.count == 1 ? "0" + hex : hex
+        }.joined()
     }
 }

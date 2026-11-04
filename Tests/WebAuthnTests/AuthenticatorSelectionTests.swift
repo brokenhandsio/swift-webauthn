@@ -13,6 +13,7 @@
 
 #if canImport(FoundationEssentials)
 import FoundationEssentials
+import Foundation
 #else
 import Foundation
 #endif
