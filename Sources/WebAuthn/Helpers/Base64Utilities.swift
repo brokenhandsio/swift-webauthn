@@ -13,7 +13,6 @@
 
 #if canImport(FoundationEssentials)
 import FoundationEssentials
-import Foundation
 #else
 import Foundation
 #endif
@@ -43,11 +42,16 @@ public struct EncodedBase64: ExpressibleByStringLiteral, Codable, Hashable, Equa
 
     /// Return as Base64URL
     public var urlEncoded: URLEncodedBase64 {
-        return .init(
-            self.base64.replacingOccurrences(of: "+", with: "-")
-                .replacingOccurrences(of: "/", with: "_")
-                .replacingOccurrences(of: "=", with: "")
-        )
+        // Character matching would miss alphabet symbols followed by combining scalars.
+        let bytes = self.base64.utf8.lazy.compactMap { byte -> UInt8? in
+            switch byte {
+            case UInt8(ascii: "+"): return UInt8(ascii: "-")
+            case UInt8(ascii: "/"): return UInt8(ascii: "_")
+            case UInt8(ascii: "="): return nil
+            default: return byte
+            }
+        }
+        return .init(String(decoding: bytes, as: UTF8.self))
     }
 
     /// Decodes Base64 string and transforms result into `Data`
@@ -91,9 +95,16 @@ public struct URLEncodedBase64: ExpressibleByStringLiteral, Codable, Hashable, E
 
     /// Decodes Base64URL into Base64
     public var urlDecoded: EncodedBase64 {
-        var result = self.base64URL.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+        let bytes = self.base64URL.utf8.lazy.map { byte in
+            switch byte {
+            case UInt8(ascii: "-"): return UInt8(ascii: "+")
+            case UInt8(ascii: "_"): return UInt8(ascii: "/")
+            default: return byte
+            }
+        }
+        var result = String(decoding: bytes, as: UTF8.self)
         while result.count % 4 != 0 {
-            result = result.appending("=")
+            result.append("=")
         }
         return .init(result)
     }
