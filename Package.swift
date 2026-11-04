@@ -1,4 +1,4 @@
-// swift-tools-version: 6.3
+// swift-tools-version: 6.4
 //===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift WebAuthn open source project
@@ -42,7 +42,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/brokenhandsio/swift-cbor.git", from: "0.0.1"),
-        .package(url: "https://github.com/apple/swift-crypto.git", "3.8.1" ..< "5.0.0"),
+        .package(url: "https://github.com/apple/swift-crypto.git", "3.8.1" ..< "6.0.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
         .package(url: "https://github.com/swiftlang/swift-docc-plugin.git", from: "1.1.0")
     ],

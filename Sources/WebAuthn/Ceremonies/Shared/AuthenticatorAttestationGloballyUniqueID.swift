@@ -55,7 +55,7 @@ public struct AuthenticatorAttestationGloballyUniqueID: Hashable, Sendable {
     
     /// Access the AAGUID as an encoded byte sequence.
     @inlinable
-    public var bytes: [UInt8] { unsafe withUnsafeBytes(of: id) { unsafe Array($0) } }
+    public var bytes: [UInt8] { withUnsafeBytes(of: id) { unsafe Array($0) } }
     
     /// The identifier of an anonymized authenticator, set to a byte sequence of 16 zeros.
     public static let anonymous = AuthenticatorAttestationGloballyUniqueID(bytes: Array(repeating: 0, count: Self.size))!
