@@ -25,7 +25,7 @@ extension BidirectionalCollection where Element == UInt8 {
     func casting<R>() -> R {
         precondition(self.count == MemoryLayout<R>.size, "self.count (\(self.count)) does not match MemoryLayout<R>.size (\(MemoryLayout<R>.size))")
         
-        let result = unsafe self.withContiguousStorageIfAvailable({
+        let result = self.withContiguousStorageIfAvailable({
             unsafe $0.withUnsafeBytes { unsafe $0.loadUnaligned(as: R.self) }
         }) ?? Array(self).withUnsafeBytes {
             unsafe $0.loadUnaligned(as: R.self)
