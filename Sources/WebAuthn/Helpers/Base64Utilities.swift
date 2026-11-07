@@ -43,9 +43,9 @@ public struct EncodedBase64: ExpressibleByStringLiteral, Codable, Hashable, Equa
     /// Return as Base64URL
     public var urlEncoded: URLEncodedBase64 {
         return .init(
-            self.base64.replacingOccurrences(of: "+", with: "-")
-                .replacingOccurrences(of: "/", with: "_")
-                .replacingOccurrences(of: "=", with: "")
+            self.base64.replacing("+", with: "-")
+                .replacing("/", with: "_")
+                .replacing("=", with: "")
         )
     }
 
@@ -90,9 +90,9 @@ public struct URLEncodedBase64: ExpressibleByStringLiteral, Codable, Hashable, E
 
     /// Decodes Base64URL into Base64
     public var urlDecoded: EncodedBase64 {
-        var result = self.base64URL.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+        var result = self.base64URL.replacing("-", with: "+").replacing("_", with: "/")
         while result.count % 4 != 0 {
-            result = result.appending("=")
+            result += "="
         }
         return .init(result)
     }
