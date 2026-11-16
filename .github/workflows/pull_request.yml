@@ -22,3 +22,11 @@ jobs:
       windows_exclude_swift_versions: "[{\"swift_version\": \"5.8\"}, {\"swift_version\": \"5.9\"}, {\"swift_version\": \"5.10\"}]"
       swift_flags: "-Xswiftc -warnings-as-errors --explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
       swift_nightly_flags: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
+
+  foundation-linking:
+    name: Foundation linking
+    uses: vapor/ci/.github/workflows/check-foundation-linking.yml@8b1b76d6e1aa6f8c65789ee4dc53c3c5d8f2b491
+    permissions:
+      contents: read
+    with:
+      swift_image: swift:6.4
