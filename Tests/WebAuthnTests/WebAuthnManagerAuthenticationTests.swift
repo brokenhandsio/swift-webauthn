@@ -18,7 +18,7 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
-import SwiftCBOR
+import CBOR
 import Crypto
 
 struct WebAuthnManagerAuthenticationTests {

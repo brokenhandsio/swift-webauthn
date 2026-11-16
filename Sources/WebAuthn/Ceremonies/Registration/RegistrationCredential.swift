@@ -56,6 +56,7 @@ extension RegistrationCredential: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(id, forKey: .id)
+        try container.encode(type, forKey: .type)
         try container.encode(rawID.base64URLEncodedString(), forKey: .rawID)
         try container.encode(attestationResponse, forKey: .attestationResponse)
     }
