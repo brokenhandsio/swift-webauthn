@@ -31,18 +31,18 @@ let extraSettings: [SwiftSetting] = [
 let package = Package(
     name: "swift-webauthn",
     platforms: [
-        .macOS(.v26),
-        .iOS(.v26),
-        .tvOS(.v26),
-        .macCatalyst(.v26),
-        .visionOS(.v26),
-        .watchOS(.v26),
+        .macOS(.v13),
+        .iOS(.v16),
+        .tvOS(.v16),
+        .macCatalyst(.v16),
+        .visionOS(.v1),
+        .watchOS(.v9),
     ],
     products: [
         .library(name: "WebAuthn", targets: ["WebAuthn"])
     ],
     dependencies: [
-        .package(url: "https://github.com/brokenhandsio/swift-cbor.git", from: "0.1.0"),
+        .package(url: "https://github.com/brokenhandsio/swift-cbor.git", from: "0.3.0"),
         .package(url: "https://github.com/apple/swift-crypto.git", "3.8.1" ..< "6.0.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
         .package(url: "https://github.com/swiftlang/swift-docc-plugin.git", from: "1.1.0")
