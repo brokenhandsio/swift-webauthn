@@ -34,7 +34,10 @@ extension String {
 
 extension Data {
     var hexadecimal: String {
-        return map { unsafe String(format: "%02x", $0) }
-            .joined()
+        map { byte in
+            let hex = String(byte, radix: 16)
+            return byte < 0x10 ? "0" + hex : hex
+        }
+        .joined()
     }
 }

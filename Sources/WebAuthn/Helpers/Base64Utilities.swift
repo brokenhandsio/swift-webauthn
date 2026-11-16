@@ -92,7 +92,7 @@ public struct URLEncodedBase64: ExpressibleByStringLiteral, Codable, Hashable, E
     public var urlDecoded: EncodedBase64 {
         var result = self.base64URL.replacing("-", with: "+").replacing("_", with: "/")
         while result.count % 4 != 0 {
-            result = result.appending("=")
+            result.append("=")
         }
         return .init(result)
     }
