@@ -41,6 +41,7 @@ jobs:
       # The Windows runner installs a pinned Swift patch release. The container image tracks the newest patch release.
       windows_use_docker: true
       # macOS jobs run on swiftlang's self-hosted runners, which this organisation does not have.
+      # The macOS job below covers macOS on GitHub-hosted runners instead.
       enable_macos: false
       enable_macos_swiftly: false
       # The Static Linux and Android SDK builds stay on (the default); Android also runs the tests on an emulator.
@@ -51,6 +52,33 @@ jobs:
       enable_embedded_wasm_sdk_build: false
       # Not yet verified for this package.
       enable_freebsd: false
+
+  macos:
+    name: macOS (Xcode ${{ matrix.xcode }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Newest Xcode 26 on the macos-26 image (Swift 6.3 era).
+          - runner: macos-26
+            xcode: "26.6"
+          # Newest Xcode 27 on the xcode-27 image (Swift 6.4).
+          - runner: xcode-27
+            xcode: "27.2"
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+      - name: Build and test
+        run: swift test -Xswiftc -warnings-as-errors --explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable
 
   foundation-linking:
     name: Foundation linking
