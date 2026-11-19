@@ -1,0 +1,4 @@
+.build/
+
+# libFuzzer's per-worker logs, written by --jobs.
+/fuzz-*.log

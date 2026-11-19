@@ -1,0 +1,93 @@
+name: Fuzz
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # 03:17 UTC daily. Off the hour to avoid GitHub's scheduler backlog.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      seconds:
+        description: "Soak duration per target, in seconds"
+        default: "600"
+
+concurrency:
+  # Scheduled soaks are keyed per-run so a nightly is never cancelled by a push.
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'schedule' && github.run_id || '' }}
+  cancel-in-progress: true
+
+jobs:
+  # Fast regression gate: replays the committed corpus and every saved crash
+  # artefact once each, mutating nothing. Seconds, not minutes.
+  #
+  # It runs on the schedule too. The soak starts from the corpus but never
+  # replays Crashes/, so without this a regression against a previously-fixed
+  # bug would not be caught by the nightly.
+  replay:
+    name: Replay (${{ matrix.target }})
+    runs-on: ubuntu-latest
+    container: swift:6.3
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [WebAuthnAuthentication, WebAuthnRegistration]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Replay corpus and saved crashes
+        working-directory: Fuzzing
+        run: |
+          swift package --allow-writing-to-package-directory \
+            fuzz ${{ matrix.target }} --replay
+
+  soak:
+    name: Soak (${{ matrix.target }})
+    # Nightly and on demand only; pushes and pull requests get the replay gate.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    container: swift:6.3
+    timeout-minutes: 45
+    strategy:
+      # One target crashing must not cancel the others' search.
+      fail-fast: false
+      matrix:
+        target: [WebAuthnAuthentication, WebAuthnRegistration]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Fuzz
+        working-directory: Fuzzing
+        run: |
+          swift package --allow-writing-to-package-directory \
+            fuzz ${{ matrix.target }} \
+            --time ${{ github.event.inputs.seconds || '600' }}
+
+      # The container is discarded when the job ends, so a crashing input that
+      # is not uploaded is lost and the finding is unreproducible.
+      - name: Upload crashing inputs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crashes-${{ matrix.target }}
+          path: Fuzzing/Crashes/${{ matrix.target }}/
+          if-no-files-found: ignore
+
+      # Whatever new coverage the soak found. Not committed automatically: the
+      # working corpus is mostly redundant and wants minimizing first.
+      - name: Upload corpus
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: corpus-${{ matrix.target }}
+          path: Fuzzing/Corpus/${{ matrix.target }}/
+          if-no-files-found: ignore
+          retention-days: 14
