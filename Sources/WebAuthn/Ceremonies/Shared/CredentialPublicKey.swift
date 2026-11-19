@@ -45,7 +45,7 @@ enum CredentialPublicKey: Sendable {
     init(publicKeyBytes: [UInt8]) throws {
         let publicKeyObject: CBOR
         do {
-            publicKeyObject = try CBOR.decode(publicKeyBytes, options: CBOROptions(maximumDepth: 16))
+            publicKeyObject = try CBOR.decode(publicKeyBytes, options: CBORDecodingOptions(maximumDepth: 16))
         } catch {
             throw WebAuthnError.badPublicKeyBytes
         }
@@ -72,8 +72,7 @@ enum CredentialPublicKey: Sendable {
             case let .negativeInt(algorithmNegative) = algorithmRaw else {
             throw WebAuthnError.invalidAlgorithm
         }
-        // https://github.com/unrelentingtech/SwiftCBOR#swiftcbor
-        // Negative integers are decoded as NegativeInt(UInt), where the actual number is -1 - i
+        // CBOR stores a negative integer as its distance below -1: `.negativeInt(n)` is -1 - n.
         guard let algorithm = COSEAlgorithmIdentifier(rawValue: -1 - Int(algorithmNegative)) else {
             throw WebAuthnError.unsupportedCOSEAlgorithm
         }
@@ -117,9 +116,8 @@ struct EC2PublicKey: PublicKey, Sendable {
     init(publicKeyObject: CBOR, algorithm: COSEAlgorithmIdentifier) throws(WebAuthnError) {
         self.algorithm = algorithm
 
-        // Curve is key -1 - or -0 for SwiftCBOR
-        // X Coordinate is key -2, or NegativeInt 1 for SwiftCBOR
-        // Y Coordinate is key -3, or NegativeInt 2 for SwiftCBOR
+        // Curve is key -1, X Coordinate is key -2 and Y Coordinate is key -3, which CBOR stores
+        // as `.negativeInt(0)`, `.negativeInt(1)` and `.negativeInt(2)`.
         guard let curveRaw = publicKeyObject[COSEKey.crv.cbor],
             case let .unsignedInt(curve) = curveRaw,
             let coseCurve = COSECurve(rawValue: curve) else {
@@ -217,12 +215,12 @@ struct OKPPublicKey: PublicKey, Sendable {
 
     init(publicKeyObject: CBOR, algorithm: COSEAlgorithmIdentifier) throws(WebAuthnError) {
         self.algorithm = algorithm
-        // Curve is key -1, or NegativeInt 0 for SwiftCBOR
+        // Curve is key -1, stored as `.negativeInt(0)`.
         guard let curveRaw = publicKeyObject[.negativeInt(0)], case let .unsignedInt(curve) = curveRaw else {
             throw .invalidCurve
         }
         self.curve = curve
-        // X Coordinate is key -2, or NegativeInt 1 for SwiftCBOR
+        // X Coordinate is key -2, stored as `.negativeInt(1)`.
         guard let xCoordRaw = publicKeyObject[.negativeInt(1)],
             case let .byteString(xCoordinateBytes) = xCoordRaw else {
             throw .invalidXCoordinate

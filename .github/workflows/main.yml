@@ -36,8 +36,8 @@ jobs:
       enable_macos: false
       enable_macos_swiftly: false
       # The Static Linux and Android SDK builds stay on (the default); Android also runs the tests on an emulator.
-      # Wasm is blocked by two dependencies: SwiftCBOR uses NSEC_PER_SEC, which WASI lacks, and
-      # swift-crypto's _CryptoExtras (needed for RSA) has no WASI thread-local storage as of 5.1.1.
+      # Wasm is blocked by swift-crypto: _CryptoExtras (needed for RSA) has no WASI thread-local
+      # storage as of 5.1.2.
       enable_wasm_sdk_build: false
       # Embedded Swift has no Codable or Foundation, which the WebAuthn API is built on.
       enable_embedded_wasm_sdk_build: false
