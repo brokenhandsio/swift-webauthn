@@ -31,6 +31,11 @@ public struct AuthenticatorAttestationResponse: Sendable {
     ///
     /// When decoding using `Decodable`, this is decoded from base64url to bytes.
     public let attestationObject: [UInt8]
+    
+	public init(clientDataJSON: [UInt8], attestationObject: [UInt8]) {
+		self.clientDataJSON = clientDataJSON
+		self.attestationObject = attestationObject
+	}
 }
 
 extension AuthenticatorAttestationResponse: Codable {
