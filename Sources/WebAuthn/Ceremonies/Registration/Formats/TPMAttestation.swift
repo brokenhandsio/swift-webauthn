@@ -14,7 +14,7 @@
 // 🚨 WIP
 
 // import Foundation
-// import SwiftCBOR
+// import CBOR
 
 // /// 🚨 WIP
 // struct TPMAttestation {

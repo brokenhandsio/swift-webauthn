@@ -494,8 +494,7 @@ struct WebAuthnManagerRegistrationTests {
         #expect(credential.aaguid?.bytes == Array(repeating: 0, count: 16))
     }
     
-    // TODO: Re-enable once we've migrated off SwiftCBOR to the new CBOR library.
-    @Test(.disabled("Flaky with SwiftCBOR; re-enable after the CBOR library migration"))
+    @Test
     func finishRegistrationFuzzying() async throws {
         for _ in 1...50 {
             let length = Int.random(in: 1...10_000_000)

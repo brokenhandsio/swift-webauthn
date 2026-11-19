@@ -107,7 +107,7 @@ extension AuthenticatorData {
         /// Assuming valid CBOR, verify the public key's length by decoding the next CBOR item and checking how many bytes it consumed.
         let publicKeyLength: Int
         do {
-            let (_, bytesConsumed) = try CBOR.decodeFirst(data[credentialIDEndIndex...], options: CBOROptions(maximumDepth: 16))
+            let (_, bytesConsumed) = try CBOR.decodeFirst(data[credentialIDEndIndex...], options: CBORDecodingOptions(maximumDepth: 16))
             publicKeyLength = bytesConsumed
         } catch { throw .invalidPublicKeyLength }
         let publicKeyBytes = data[credentialIDEndIndex..<(credentialIDEndIndex + publicKeyLength)]
