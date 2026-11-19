@@ -36,6 +36,7 @@ public struct AttestationObject: Sendable {
     func verify(
         relyingPartyID: String,
         verificationRequired: Bool,
+        requireUserPresence: Bool = true,
         clientDataHash: SHA256.Digest,
         supportedPublicKeyAlgorithms: [PublicKeyCredentialParameters],
         pemRootCertificatesByFormat: [AttestationFormat: [Data]] = [:]
@@ -46,8 +47,10 @@ public struct AttestationObject: Sendable {
             throw WebAuthnError.relyingPartyIDHashDoesNotMatch
         }
 
-        guard authenticatorData.flags.userPresent else {
-            throw WebAuthnError.userPresentFlagNotSet
+        if requireUserPresence {
+            guard authenticatorData.flags.userPresent else {
+                throw WebAuthnError.userPresentFlagNotSet
+            }
         }
 
         if verificationRequired {
