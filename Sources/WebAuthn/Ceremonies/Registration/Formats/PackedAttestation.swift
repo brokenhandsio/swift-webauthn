@@ -14,7 +14,7 @@
 // // 🚨 WIP
 
 // import Foundation
-// import SwiftCBOR
+// import CBOR
 // import X509
 // import Crypto
 
