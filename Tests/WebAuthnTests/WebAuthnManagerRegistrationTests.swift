@@ -11,14 +11,16 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CBOR
+import Testing
+
+@testable import WebAuthn
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-@testable import WebAuthn
-import Testing
-import CBOR
 
 struct WebAuthnManagerRegistrationTests {
     var webAuthnManager: WebAuthnManager!
@@ -60,7 +62,7 @@ struct WebAuthnManagerRegistrationTests {
 
     // MARK: - beginRegistration()
     @Test
-    func beginRegistrationReturns()  {
+    func beginRegistrationReturns() {
         let user = PublicKeyCredentialUserEntity.mock
         let publicKeyCredentialParameter = PublicKeyCredentialParameters(type: .publicKey, alg: .algES256)
         let options = webAuthnManager.beginRegistration(
@@ -78,7 +80,7 @@ struct WebAuthnManagerRegistrationTests {
     }
 
     // MARK: - finishRegistration()
-    
+
     @Test(arguments: [
         TestKeyConfiguration.ecdsa,
         TestKeyConfiguration.rsa,
@@ -93,7 +95,7 @@ struct WebAuthnManagerRegistrationTests {
             )
         }
     }
-    
+
     @Test(arguments: [
         TestKeyConfiguration.ecdsa,
         TestKeyConfiguration.rsa,
@@ -109,7 +111,7 @@ struct WebAuthnManagerRegistrationTests {
             )
         }
     }
-    
+
     @Test(arguments: [
         TestKeyConfiguration.ecdsa,
         TestKeyConfiguration.rsa,
@@ -125,7 +127,7 @@ struct WebAuthnManagerRegistrationTests {
             )
         }
     }
-    
+
     @Test(arguments: [
         TestKeyConfiguration.ecdsa,
         TestKeyConfiguration.rsa,
@@ -151,7 +153,7 @@ struct WebAuthnManagerRegistrationTests {
             )
         }
     }
-    
+
     @Test
     func finishRegistrationFailsIfAttestationObjectIsNotBase64() async throws {
         await #expect(throws: WebAuthnError.invalidAttestationObject) {
@@ -223,14 +225,17 @@ struct WebAuthnManagerRegistrationTests {
         TestKeyConfiguration.ecdsa,
         TestKeyConfiguration.rsa,
     ])
-    func finishRegistrationFailsIfAttestedCredentialDataFlagIsSetButThereIsNoCredentialData(keyConfiguration: TestKeyConfiguration) async throws {
+    func finishRegistrationFailsIfAttestedCredentialDataFlagIsSetButThereIsNoCredentialData(keyConfiguration: TestKeyConfiguration)
+        async throws
+    {
         await #expect(throws: WebAuthnError.attestedCredentialDataMissing) {
             try await finishRegistration(
                 attestationObject: keyConfiguration.attestationObjectBuilder
-                    .authData { $0
-                        .flags(0b01000001)
-                        .noAttestedCredentialData()
-                        .noExtensionData()
+                    .authData {
+                        $0
+                            .flags(0b01000001)
+                            .noAttestedCredentialData()
+                            .noExtensionData()
                     }
                     .build()
                     .cborEncoded
@@ -242,13 +247,16 @@ struct WebAuthnManagerRegistrationTests {
         TestKeyConfiguration.ecdsa,
         TestKeyConfiguration.rsa,
     ])
-    func finishRegistrationFailsIfAttestedCredentialDataFlagIsNotSetButThereIsCredentialData(keyConfiguration: TestKeyConfiguration) async throws {
+    func finishRegistrationFailsIfAttestedCredentialDataFlagIsNotSetButThereIsCredentialData(keyConfiguration: TestKeyConfiguration)
+        async throws
+    {
         await #expect(throws: WebAuthnError.attestedCredentialFlagNotSet) {
             try await finishRegistration(
                 attestationObject: keyConfiguration.attestationObjectBuilder
-                    .authData { $0
-                        .flags(0b00000001)
-                        .attestedCredData(credentialPublicKey: [])
+                    .authData {
+                        $0
+                            .flags(0b00000001)
+                            .attestedCredData(credentialPublicKey: [])
                     }
                     .build()
                     .cborEncoded
@@ -279,13 +287,14 @@ struct WebAuthnManagerRegistrationTests {
         await #expect(throws: WebAuthnError.credentialIDTooShort) {
             try await finishRegistration(
                 attestationObject: keyConfiguration.attestationObjectBuilder
-                    .authData { $0
-                        .attestedCredData(
-                            credentialIDLength: [0b00000000, 0b00000010], // we expect length = 2
-                            credentialID: [255], // but only get length = 1
-                            credentialPublicKey: []
-                        )
-                        .noExtensionData()
+                    .authData {
+                        $0
+                            .attestedCredData(
+                                credentialIDLength: [0b00000000, 0b00000010],  // we expect length = 2
+                                credentialID: [255],  // but only get length = 1
+                                credentialPublicKey: []
+                            )
+                            .noExtensionData()
                     }
                     .build()
                     .cborEncoded
@@ -368,7 +377,7 @@ struct WebAuthnManagerRegistrationTests {
             )
         }
     }
-    
+
     @Test(arguments: [
         TestKeyConfiguration.ecdsa,
         TestKeyConfiguration.rsa,
@@ -377,27 +386,29 @@ struct WebAuthnManagerRegistrationTests {
         /// This should succeed as it's on the border of being acceptable
         _ = try await finishRegistration(
             attestationObject: keyConfiguration.attestationObjectBuilder
-                .authData { $0
-                    .attestedCredData(
-                        credentialIDLength: [0b000_00011, 0b1111_1111],
-                        credentialID: Array(repeating: 0, count: 1023),
-                        credentialPublicKey: keyConfiguration.credentialPublicKey
-                    )
+                .authData {
+                    $0
+                        .attestedCredData(
+                            credentialIDLength: [0b000_00011, 0b1111_1111],
+                            credentialID: Array(repeating: 0, count: 1023),
+                            credentialPublicKey: keyConfiguration.credentialPublicKey
+                        )
                 }
                 .build()
                 .cborEncoded
         )
-        
+
         /// While this one should throw
         await #expect(throws: WebAuthnError.credentialIDTooLong) {
             try await finishRegistration(
                 attestationObject: keyConfiguration.attestationObjectBuilder
-                    .authData { $0
-                        .attestedCredData(
-                            credentialIDLength: [0b000_00100, 0b0000_0000],
-                            credentialID: Array(repeating: 0, count: 1024),
-                            credentialPublicKey: keyConfiguration.credentialPublicKey
-                        )
+                    .authData {
+                        $0
+                            .attestedCredData(
+                                credentialIDLength: [0b000_00100, 0b0000_0000],
+                                credentialID: Array(repeating: 0, count: 1024),
+                                credentialPublicKey: keyConfiguration.credentialPublicKey
+                            )
                     }
                     .build()
                     .cborEncoded
@@ -428,7 +439,7 @@ struct WebAuthnManagerRegistrationTests {
         #expect(credential.id == credentialID.base64EncodedString().asString())
         #expect(credential.publicKey == credentialPublicKey)
     }
-    
+
     @Test(arguments: [
         TestKeyConfiguration.ecdsa,
         TestKeyConfiguration.rsa,
@@ -457,16 +468,16 @@ struct WebAuthnManagerRegistrationTests {
         #expect(credential.aaguid != nil)
         #expect(credential.aaguid?.id == testAAGUID.id)
         #expect(credential.aaguid?.bytes == testAAGUID.bytes)
-        
+
         // Test that credential.attestationObject.aaguid returns the same value
         #expect(credential.attestationObject.aaguid != nil)
         #expect(credential.attestationObject.aaguid?.id == testAAGUID.id)
         #expect(credential.attestationObject.aaguid?.bytes == testAAGUID.bytes)
-        
+
         // Verify they return the same value
         #expect(credential.aaguid == credential.attestationObject.aaguid)
     }
-    
+
     @Test(arguments: [
         TestKeyConfiguration.ecdsa,
         TestKeyConfiguration.rsa,
@@ -476,7 +487,7 @@ struct WebAuthnManagerRegistrationTests {
         let credentialID: [UInt8] = [0, 1, 0, 1, 0, 1]
         let credentialPublicKey: [UInt8] = keyConfiguration.credentialPublicKey
         let authData = keyConfiguration.authDataBuilder
-            .attestedCredData(credentialPublicKey: credentialPublicKey) // Uses .anonymous by default
+            .attestedCredData(credentialPublicKey: credentialPublicKey)  // Uses .anonymous by default
             .noExtensionData()
         let attestationObject = keyConfiguration.attestationObjectBuilder
             .authData(authData)
@@ -493,7 +504,7 @@ struct WebAuthnManagerRegistrationTests {
         #expect(credential.aaguid == .anonymous)
         #expect(credential.aaguid?.bytes == Array(repeating: 0, count: 16))
     }
-    
+
     @Test
     func finishRegistrationFuzzying() async throws {
         for _ in 1...50 {

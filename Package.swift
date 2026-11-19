@@ -43,9 +43,9 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/brokenhandsio/swift-cbor.git", from: "1.0.0-rc.1"),
-        .package(url: "https://github.com/apple/swift-crypto.git", "3.8.1" ..< "6.0.0"),
+        .package(url: "https://github.com/apple/swift-crypto.git", "3.8.1"..<"6.0.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
-        .package(url: "https://github.com/swiftlang/swift-docc-plugin.git", from: "1.1.0")
+        .package(url: "https://github.com/swiftlang/swift-docc-plugin.git", from: "1.1.0"),
     ],
     targets: [
         .target(
@@ -67,6 +67,6 @@ let package = Package(
                 .product(name: "_CryptoExtras", package: "swift-crypto"),
             ],
             swiftSettings: extraSettings
-        )
+        ),
     ]
 )

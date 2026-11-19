@@ -24,7 +24,7 @@ public struct VerifiedAuthentication: Sendable {
         public init(_ rawValue: String) {
             self.rawValue = rawValue
         }
-        
+
         public static let singleDevice: Self = "single_device"
         public static let multiDevice: Self = "multi_device"
     }

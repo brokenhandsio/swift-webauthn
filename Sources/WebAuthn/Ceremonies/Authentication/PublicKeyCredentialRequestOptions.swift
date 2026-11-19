@@ -96,7 +96,7 @@ extension PublicKeyCredentialRequestOptions: Codable {
         self.allowCredentials = try values.decodeIfPresent([PublicKeyCredentialDescriptor].self, forKey: .allowCredentials)
         self.userVerification = try values.decodeIfPresent(UserVerificationRequirement.self, forKey: .userVerification)
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -127,7 +127,7 @@ public struct PublicKeyCredentialDescriptor: Equatable, Sendable {
         public init(_ rawValue: String) {
             self.rawValue = rawValue
         }
-        
+
         /// Indicates the respective authenticator can be contacted over removable USB.
         public static let usb: Self = "usb"
         /// Indicates the respective authenticator can be contacted over Near Field Communication (NFC).
@@ -196,7 +196,7 @@ public struct UserVerificationRequirement: UnreferencedStringEnumeration, Sendab
     public init(_ rawValue: String) {
         self.rawValue = rawValue
     }
-    
+
     /// The Relying Party requires user verification for the operation and will fail the overall ceremony if the
     /// user wasn't verified.
     public static let required: Self = "required"

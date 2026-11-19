@@ -11,14 +11,15 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CBOR
 import Crypto
 import _CryptoExtras
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import CBOR
 
 protocol PublicKey: Sendable {
     var algorithm: COSEAlgorithmIdentifier { get }
@@ -33,11 +34,11 @@ enum CredentialPublicKey: Sendable {
 
     var key: any PublicKey {
         switch self {
-        case let .okp(key):
+        case .okp(let key):
             return key
-        case let .ec2(key):
+        case .ec2(let key):
             return key
-        case let .rsa(key):
+        case .rsa(let key):
             return key
         }
     }
@@ -53,23 +54,26 @@ enum CredentialPublicKey: Sendable {
         // A leading 0x04 means we got a public key from an old U2F security key.
         // https://fidoalliance.org/specs/fido-v2.0-id-20180227/fido-registry-v2.0-id-20180227.html#public-key-representation-formats
         guard publicKeyBytes[0] != 0x04 else {
-            self = .ec2(EC2PublicKey(
-                algorithm: .algES256,
-                curve: .p256,
-                xCoordinate: Array(publicKeyBytes[1...33]),
-                yCoordinate: Array(publicKeyBytes[33...65])
-            ))
+            self = .ec2(
+                EC2PublicKey(
+                    algorithm: .algES256,
+                    curve: .p256,
+                    xCoordinate: Array(publicKeyBytes[1...33]),
+                    yCoordinate: Array(publicKeyBytes[33...65])
+                ))
             return
         }
 
         guard let keyTypeRaw = publicKeyObject[COSEKey.kty.cbor],
-            case let .unsignedInt(keyTypeInt) = keyTypeRaw,
-            let keyType = COSEKeyType(rawValue: keyTypeInt) else {
+            case .unsignedInt(let keyTypeInt) = keyTypeRaw,
+            let keyType = COSEKeyType(rawValue: keyTypeInt)
+        else {
             throw WebAuthnError.invalidKeyType
         }
 
         guard let algorithmRaw = publicKeyObject[COSEKey.alg.cbor],
-            case let .negativeInt(algorithmNegative) = algorithmRaw else {
+            case .negativeInt(let algorithmNegative) = algorithmRaw
+        else {
             throw WebAuthnError.invalidAlgorithm
         }
         // CBOR stores a negative integer as its distance below -1: `.negativeInt(n)` is -1 - n.
@@ -84,8 +88,8 @@ enum CredentialPublicKey: Sendable {
         case .rsaKey:
             self = try .rsa(RSAPublicKeyData(publicKeyObject: publicKeyObject, algorithm: algorithm))
         case .octetKey:
-            throw WebAuthnError.unsupported
             // self = try .okp(OKPPublicKey(publicKeyObject: publicKeyObject, algorithm: algorithm))
+            throw WebAuthnError.unsupported
         }
     }
 
@@ -119,19 +123,22 @@ struct EC2PublicKey: PublicKey, Sendable {
         // Curve is key -1, X Coordinate is key -2 and Y Coordinate is key -3, which CBOR stores
         // as `.negativeInt(0)`, `.negativeInt(1)` and `.negativeInt(2)`.
         guard let curveRaw = publicKeyObject[COSEKey.crv.cbor],
-            case let .unsignedInt(curve) = curveRaw,
-            let coseCurve = COSECurve(rawValue: curve) else {
+            case .unsignedInt(let curve) = curveRaw,
+            let coseCurve = COSECurve(rawValue: curve)
+        else {
             throw .invalidCurve
         }
         self.curve = coseCurve
 
         guard let xCoordRaw = publicKeyObject[COSEKey.x.cbor],
-              case let .byteString(xCoordinateBytes) = xCoordRaw else {
+            case .byteString(let xCoordinateBytes) = xCoordRaw
+        else {
             throw .invalidXCoordinate
         }
         xCoordinate = xCoordinateBytes
         guard let yCoordRaw = publicKeyObject[COSEKey.y.cbor],
-              case let .byteString(yCoordinateBytes) = yCoordRaw else {
+            case .byteString(let yCoordinateBytes) = yCoordRaw
+        else {
             throw .invalidYCoordinate
         }
         yCoordinate = yCoordinateBytes
@@ -141,20 +148,26 @@ struct EC2PublicKey: PublicKey, Sendable {
         switch algorithm {
         case .algES256:
             let ecdsaSignature = try P256.Signing.ECDSASignature(derRepresentation: signature)
-            guard try P256.Signing.PublicKey(rawRepresentation: rawRepresentation)
-                .isValidSignature(ecdsaSignature, for: data) else {
+            guard
+                try P256.Signing.PublicKey(rawRepresentation: rawRepresentation)
+                    .isValidSignature(ecdsaSignature, for: data)
+            else {
                 throw WebAuthnError.invalidSignature
             }
         case .algES384:
             let ecdsaSignature = try P384.Signing.ECDSASignature(derRepresentation: signature)
-            guard try P384.Signing.PublicKey(rawRepresentation: rawRepresentation)
-                .isValidSignature(ecdsaSignature, for: data) else {
+            guard
+                try P384.Signing.PublicKey(rawRepresentation: rawRepresentation)
+                    .isValidSignature(ecdsaSignature, for: data)
+            else {
                 throw WebAuthnError.invalidSignature
             }
         case .algES512:
             let ecdsaSignature = try P521.Signing.ECDSASignature(derRepresentation: signature)
-            guard try P521.Signing.PublicKey(rawRepresentation: rawRepresentation)
-                .isValidSignature(ecdsaSignature, for: data) else {
+            guard
+                try P521.Signing.PublicKey(rawRepresentation: rawRepresentation)
+                    .isValidSignature(ecdsaSignature, for: data)
+            else {
                 throw WebAuthnError.invalidSignature
             }
         default:
@@ -176,13 +189,15 @@ struct RSAPublicKeyData: PublicKey, Sendable {
         self.algorithm = algorithm
 
         guard let nRaw = publicKeyObject[COSEKey.n.cbor],
-              case let .byteString(nBytes) = nRaw else {
+            case .byteString(let nBytes) = nRaw
+        else {
             throw .invalidModulus
         }
         n = nBytes
 
         guard let eRaw = publicKeyObject[COSEKey.e.cbor],
-              case let .byteString(eBytes) = eRaw else {
+            case .byteString(let eBytes) = eRaw
+        else {
             throw .invalidExponent
         }
         e = eBytes
@@ -216,13 +231,14 @@ struct OKPPublicKey: PublicKey, Sendable {
     init(publicKeyObject: CBOR, algorithm: COSEAlgorithmIdentifier) throws(WebAuthnError) {
         self.algorithm = algorithm
         // Curve is key -1, stored as `.negativeInt(0)`.
-        guard let curveRaw = publicKeyObject[.negativeInt(0)], case let .unsignedInt(curve) = curveRaw else {
+        guard let curveRaw = publicKeyObject[.negativeInt(0)], case .unsignedInt(let curve) = curveRaw else {
             throw .invalidCurve
         }
         self.curve = curve
         // X Coordinate is key -2, stored as `.negativeInt(1)`.
         guard let xCoordRaw = publicKeyObject[.negativeInt(1)],
-            case let .byteString(xCoordinateBytes) = xCoordRaw else {
+            case .byteString(let xCoordinateBytes) = xCoordRaw
+        else {
             throw .invalidXCoordinate
         }
         xCoordinate = xCoordinateBytes

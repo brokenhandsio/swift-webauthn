@@ -36,14 +36,17 @@ public struct AuthenticationCredential: Sendable {
 
     /// Value will always be ``CredentialType/publicKey`` (for now)
     public let type: CredentialType
-    
-	public init(id: URLEncodedBase64, rawID: [UInt8], response: AuthenticatorAssertionResponse, authenticatorAttachment: AuthenticatorAttachment?, type: CredentialType) {
-		self.id = id
-		self.rawID = rawID
-		self.response = response
-		self.authenticatorAttachment = authenticatorAttachment
-		self.type = type
-	}
+
+    public init(
+        id: URLEncodedBase64, rawID: [UInt8], response: AuthenticatorAssertionResponse, authenticatorAttachment: AuthenticatorAttachment?,
+        type: CredentialType
+    ) {
+        self.id = id
+        self.rawID = rawID
+        self.response = response
+        self.authenticatorAttachment = authenticatorAttachment
+        self.type = type
+    }
 }
 
 extension AuthenticationCredential: Codable {
@@ -56,7 +59,7 @@ extension AuthenticationCredential: Codable {
         authenticatorAttachment = try container.decodeIfPresent(AuthenticatorAttachment.self, forKey: .authenticatorAttachment)
         type = try container.decode(CredentialType.self, forKey: .type)
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -66,7 +69,6 @@ extension AuthenticationCredential: Codable {
         try container.encodeIfPresent(authenticatorAttachment, forKey: .authenticatorAttachment)
         try container.encode(type, forKey: .type)
     }
-
 
     private enum CodingKeys: String, CodingKey {
         case id

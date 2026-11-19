@@ -11,8 +11,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-@testable import WebAuthn
 import CBOR
+
+@testable import WebAuthn
 
 struct TestCredentialPublicKey {
     var kty: CBOR?
@@ -20,7 +21,7 @@ struct TestCredentialPublicKey {
     // EC2, OKP
     var crv: CBOR?
     var xCoordinate: CBOR?
-    
+
     //EC2
     var yCoordinate: CBOR?
 
@@ -45,7 +46,7 @@ struct TestCredentialPublicKey {
         if let yCoordinate {
             value[COSEKey.y.cbor] = yCoordinate
         }
-        
+
         if let nCoordinate {
             value[COSEKey.n.cbor] = nCoordinate
         }
@@ -70,22 +71,23 @@ struct TestCredentialPublicKeyBuilder {
     }
 
     func validMockECDSA() -> Self {
-        return self
+        return
+            self
             .kty(.ellipticKey)
             .crv(.p256)
             .alg(.algES256)
             .xCoordinate(TestECCKeyPair.publicKeyXCoordinate)
             .yCoordiante(TestECCKeyPair.publicKeyYCoordinate)
     }
-    
+
     func validMockRSA() -> Self {
-        return self
+        return
+            self
             .kty(.rsaKey)
             .alg(.algRS256)
             .nCoordinate(TestRSAKeyPair.publicKeyNCoordinate)
             .eCoordiante(TestRSAKeyPair.publicKeyECoordinate)
     }
-
 
     func kty(_ kty: COSEKeyType) -> Self {
         var temp = self
@@ -116,7 +118,7 @@ struct TestCredentialPublicKeyBuilder {
         temp.wrapped.yCoordinate = .byteString(yCoordinate)
         return temp
     }
-    
+
     func nCoordinate(_ nCoordinate: [UInt8]) -> Self {
         var temp = self
         temp.wrapped.nCoordinate = .byteString(nCoordinate)

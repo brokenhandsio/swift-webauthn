@@ -11,12 +11,13 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Crypto
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import Crypto
 
 /// COSEAlgorithmIdentifier From §5.10.5. A number identifying a cryptographic algorithm. The algorithm
 /// identifiers SHOULD be values registered in the IANA COSE Algorithms registry
@@ -29,7 +30,7 @@ public enum COSEAlgorithmIdentifier: Int, RawRepresentable, CaseIterable, Codabl
     case algES384 = -35
     /// AlgES512 ECDSA with SHA-512
     case algES512 = -36
-    
+
     /// AlgRS1 RSASSA-PKCS1-v1_5 with SHA-1
     case algRS1 = -65535
     /// AlgRS256 RSASSA-PKCS1-v1_5 with SHA-256
@@ -46,7 +47,7 @@ public enum COSEAlgorithmIdentifier: Int, RawRepresentable, CaseIterable, Codabl
     case algPS512 = -39
     // /// AlgEdDSA EdDSA
     // case algEdDSA = -8
-    
+
     func hashAndCompare(data: Data, to compareHash: Data) -> Bool {
         switch self {
         case .algES256, .algRS256, .algPS256:

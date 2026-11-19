@@ -24,15 +24,15 @@ public struct AuthenticatorSelection: Sendable, Hashable {
     /// If present, indicates the Relying Party's preference for authenticator attachment.
     /// - SeeAlso: [WebAuthn Level 3 Working Draft §5.4.4. Authenticator Selection Criteria](https://www.w3.org/TR/webauthn-3/#dom-authenticatorselectioncriteria-authenticatorattachment)
     public var authenticatorAttachment: AuthenticatorAttachment?
-    
+
     /// Describes the Relying Party's requirements regarding whether the authenticator should create a client-side-resident public key credential source.
     /// - SeeAlso: [WebAuthn Level 3 Working Draft §5.4.4. Authenticator Selection Criteria](https://www.w3.org/TR/webauthn-3/#dom-authenticatorselectioncriteria-residentkey)
     public var residentKey: ResidentKeyRequirement?
-    
+
     /// Describes the Relying Party's requirements regarding user verification.
     /// - SeeAlso: [WebAuthn Level 3 Working Draft §5.4.4. Authenticator Selection Criteria](https://www.w3.org/TR/webauthn-3/#dom-authenticatorselectioncriteria-userverification)
     public var userVerification: UserVerificationRequirement?
-    
+
     public init(
         authenticatorAttachment: AuthenticatorAttachment? = nil,
         residentKey: ResidentKeyRequirement? = nil,

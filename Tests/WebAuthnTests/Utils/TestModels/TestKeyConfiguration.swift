@@ -19,7 +19,7 @@ import Foundation
 
 protocol TestSigner: Sendable {
     static func sign(data: Data) throws -> [UInt8]
-    
+
     static var signature: [UInt8] { get throws }
 }
 
@@ -28,7 +28,7 @@ struct TestKeyConfiguration: Sendable {
     var credentialPublicKeyBuilder: TestCredentialPublicKeyBuilder
     var authDataBuilder: TestAuthDataBuilder
     var attestationObjectBuilder: TestAttestationObjectBuilder
-    
+
     var credentialPublicKey: [UInt8] {
         credentialPublicKeyBuilder.buildAsByteArray()
     }

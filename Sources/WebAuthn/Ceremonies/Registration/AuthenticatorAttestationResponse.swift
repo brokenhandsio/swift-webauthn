@@ -11,12 +11,13 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CBOR
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import CBOR
 
 /// The response from the authenticator device for the creation of a new public key credential.
 ///
@@ -31,11 +32,11 @@ public struct AuthenticatorAttestationResponse: Sendable {
     ///
     /// When decoding using `Decodable`, this is decoded from base64url to bytes.
     public let attestationObject: [UInt8]
-    
-	public init(clientDataJSON: [UInt8], attestationObject: [UInt8]) {
-		self.clientDataJSON = clientDataJSON
-		self.attestationObject = attestationObject
-	}
+
+    public init(clientDataJSON: [UInt8], attestationObject: [UInt8]) {
+        self.clientDataJSON = clientDataJSON
+        self.attestationObject = attestationObject
+    }
 }
 
 extension AuthenticatorAttestationResponse: Codable {
@@ -71,16 +72,20 @@ struct ParsedAuthenticatorAttestationResponse {
 
         // Step 11. (assembling attestationObject)
         let attestationObjectData = Data(rawResponse.attestationObject)
-        guard let decodedAttestationObject = try? CBOR.decode([UInt8](attestationObjectData), options: CBORDecodingOptions(maximumDepth: 16)) else {
+        guard
+            let decodedAttestationObject = try? CBOR.decode([UInt8](attestationObjectData), options: CBORDecodingOptions(maximumDepth: 16))
+        else {
             throw WebAuthnError.invalidAttestationObject
         }
 
         guard let authData = decodedAttestationObject["authData"],
-            case let .byteString(authDataBytes) = authData else {
+            case .byteString(let authDataBytes) = authData
+        else {
             throw WebAuthnError.invalidAuthData
         }
         guard let formatCBOR = decodedAttestationObject["fmt"],
-            case let .textString(format) = formatCBOR else {
+            case .textString(let format) = formatCBOR
+        else {
             throw WebAuthnError.invalidFmt
         }
         let attestationFormat = AttestationFormat(format)

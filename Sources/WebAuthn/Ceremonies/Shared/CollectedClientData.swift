@@ -31,7 +31,7 @@ public struct CollectedClientData: Codable, Hashable, Sendable {
         public init(_ rawValue: String) {
             self.rawValue = rawValue
         }
-        
+
         public static let create: Self = "webauthn.create"
         public static let assert: Self = "webauthn.get"
     }
