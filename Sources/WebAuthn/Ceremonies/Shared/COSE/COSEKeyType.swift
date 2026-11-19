@@ -11,7 +11,11 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 /// The Key Type derived from the IANA COSE AuthData
 enum COSEKeyType: UInt64, RawRepresentable, Sendable {

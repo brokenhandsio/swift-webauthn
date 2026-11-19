@@ -11,7 +11,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Foundation
+#if canImport(FoundationEssentials)
+public import FoundationEssentials
+#else
+public import Foundation
+#endif
 
 /// Main entrypoint for WebAuthn operations.
 ///

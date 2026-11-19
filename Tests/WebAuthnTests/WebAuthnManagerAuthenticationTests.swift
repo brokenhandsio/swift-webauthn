@@ -13,8 +13,12 @@
 
 @testable import WebAuthn
 import Testing
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
-import SwiftCBOR
+#endif
+import CBOR
 import Crypto
 
 struct WebAuthnManagerAuthenticationTests {

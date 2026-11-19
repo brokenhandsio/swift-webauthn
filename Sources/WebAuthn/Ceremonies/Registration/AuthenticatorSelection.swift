@@ -11,7 +11,11 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 /// A dictionary describing the Relying Party's requirements regarding authenticator attributes.
 ///
@@ -75,4 +79,3 @@ extension AuthenticatorSelection: Codable {
         case requireResidentKey
     }
 }
-

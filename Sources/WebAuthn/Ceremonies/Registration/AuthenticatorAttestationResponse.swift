@@ -11,8 +11,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
-import SwiftCBOR
+#endif
+import CBOR
 
 /// The response from the authenticator device for the creation of a new public key credential.
 ///
@@ -76,7 +80,7 @@ struct ParsedAuthenticatorAttestationResponse {
             throw WebAuthnError.invalidAuthData
         }
         guard let formatCBOR = decodedAttestationObject["fmt"],
-            case let .utf8String(format) = formatCBOR else {
+            case let .textString(format) = formatCBOR else {
             throw WebAuthnError.invalidFmt
         }
         let attestationFormat = AttestationFormat(format)

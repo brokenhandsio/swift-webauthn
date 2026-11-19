@@ -11,7 +11,11 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 /// The Relying Party's requirements regarding whether the authenticator should create a client-side-resident public key credential source.
 ///
@@ -37,4 +41,3 @@ public struct ResidentKeyRequirement: UnreferencedStringEnumeration, Sendable {
     /// - SeeAlso: [WebAuthn Level 3 Working Draft §5.4.6. Resident Key Requirement Enumeration](https://www.w3.org/TR/webauthn-3/#dom-residentkeyrequirement-discouraged)
     public static let discouraged: Self = "discouraged"
 }
-

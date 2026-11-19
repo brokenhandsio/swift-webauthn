@@ -11,7 +11,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Foundation
+#if canImport(FoundationEssentials)
+public import FoundationEssentials
+#else
+public import Foundation
+#endif
 
 /// A globally unique ID identifying an authenticator.
 ///
@@ -34,10 +38,12 @@ public struct AuthenticatorAttestationGloballyUniqueID: Hashable, Sendable {
     /// This sequence must be of length ``AuthenticatorAttestationGloballyUniqueID/size``.
     @inlinable
     public init?(bytes: some BidirectionalCollection<UInt8>) {
-        let uuidSize = MemoryLayout<uuid_t>.size
-        assert(uuidSize == Self.size, "Size of uuid_t (\(uuidSize)) does not match Self.size (\(Self.size))!")
-        guard bytes.count == uuidSize else { return nil }
-        self.init(uuid: UUID(uuid: bytes.casting()))
+        guard bytes.count == Self.size else { return nil }
+        let b = Array(bytes)
+        self.init(uuid: UUID(uuid: (
+            b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7],
+            b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15]
+        )))
     }
     
     /// Initialize an AAGUID with a string-based UUID.
@@ -51,7 +57,13 @@ public struct AuthenticatorAttestationGloballyUniqueID: Hashable, Sendable {
     
     /// Access the AAGUID as an encoded byte sequence.
     @inlinable
-    public var bytes: [UInt8] { withUnsafeBytes(of: id) { Array($0) } }
+    public var bytes: [UInt8] {
+        let u = id.uuid
+        return [
+            u.0, u.1, u.2, u.3, u.4, u.5, u.6, u.7,
+            u.8, u.9, u.10, u.11, u.12, u.13, u.14, u.15,
+        ]
+    }
     
     /// The identifier of an anonymized authenticator, set to a byte sequence of 16 zeros.
     public static let anonymous = AuthenticatorAttestationGloballyUniqueID(bytes: Array(repeating: 0, count: Self.size))!

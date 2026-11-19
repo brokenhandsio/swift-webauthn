@@ -457,4 +457,3 @@ struct AuthenticatorSelectionTests {
         #expect(options.user.id == user.id)
     }
 }
-

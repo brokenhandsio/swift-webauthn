@@ -1,5 +1,8 @@
 name: Pull Request
 
+permissions:
+  contents: read
+
 on:
   pull_request:
     types: [opened, reopened, synchronize]
@@ -7,18 +10,80 @@ on:
 jobs:
   soundness:
     name: Soundness
-    uses: swiftlang/github-workflows/.github/workflows/soundness.yml@main
+    # Pinned to a commit: no swiftlang/github-workflows release tag carries package_test.yml yet.
+    uses: swiftlang/github-workflows/.github/workflows/soundness.yml@5cb0468ff22502aa61498410474aea13092d2580  # main as of 2026-11-14
     with:
       license_header_check_project_name: "Swift WebAuthn"
       shell_check_enabled: false
       format_check_enabled: false
       docs_check_enabled: false
 
-  unit-tests:
-    name: Unit tests
-    uses: swiftlang/github-workflows/.github/workflows/swift_package_test.yml@main
+  tests:
+    name: Tests
+    uses: swiftlang/github-workflows/.github/workflows/package_test.yml@5cb0468ff22502aa61498410474aea13092d2580  # main as of 2026-11-14
     with:
-      linux_exclude_swift_versions: "[{\"swift_version\": \"5.8\"}, {\"swift_version\": \"5.9\"}, {\"swift_version\": \"5.10\"}]"
-      windows_exclude_swift_versions: "[{\"swift_version\": \"5.8\"}, {\"swift_version\": \"5.9\"}, {\"swift_version\": \"5.10\"}]"
-      swift_flags: "-Xswiftc -warnings-as-errors --explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
-      swift_nightly_flags: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
+      # Strict flags for the release toolchains. The nightly toolchains skip -warnings-as-errors.
+      # Overrides rather than swift_flags, which would also reach the SDK builds.
+      linux_version_overrides: |
+        default: -Xswiftc -warnings-as-errors --explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable
+        nightly-release: --explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable
+        nightly-main: --explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable
+      # Windows takes its flags through an environment variable rather than windows_version_overrides:
+      # in Docker, the overrides reach swift wrapped in literal quotes and are rejected as unexpected arguments.
+      windows_env_vars: '{"COMMON_SWIFT_FLAGS": "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"}'
+      windows_command: |
+        Debug-Test:
+          command: swift test -Xswiftc -warnings-as-errors %COMMON_SWIFT_FLAGS%
+          versions: ["current-2", "current-1", "current"]
+        Debug-Test-Nightly:
+          command: swift test %COMMON_SWIFT_FLAGS%
+          versions: ["nightly-release", "nightly-main"]
+      # The Windows runner installs a pinned Swift patch release. The container image tracks the newest patch release.
+      windows_use_docker: true
+      # macOS jobs run on swiftlang's self-hosted runners, which this organisation does not have.
+      # The macOS job below covers macOS on GitHub-hosted runners instead.
+      enable_macos: false
+      enable_macos_swiftly: false
+      # The Static Linux and Android SDK builds stay on (the default); Android also runs the tests on an emulator.
+      # Wasm is blocked by two dependencies: SwiftCBOR uses NSEC_PER_SEC, which WASI lacks, and
+      # swift-crypto's _CryptoExtras (needed for RSA) has no WASI thread-local storage as of 5.1.1.
+      enable_wasm_sdk_build: false
+      # Embedded Swift has no Codable or Foundation, which the WebAuthn API is built on.
+      enable_embedded_wasm_sdk_build: false
+      # Not yet verified for this package.
+      enable_freebsd: false
+
+  macos:
+    name: macOS (Xcode ${{ matrix.xcode }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Newest Xcode 26 on the macos-26 image (Swift 6.3 era).
+          - runner: macos-26
+            xcode: "26.6"
+          # Newest Xcode 27 on the xcode-27 image (Swift 6.4).
+          - runner: xcode-27
+            xcode: "27.2"
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+      - name: Build and test
+        run: swift test -Xswiftc -warnings-as-errors --explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable
+
+  foundation-linking:
+    name: Foundation linking
+    uses: vapor/ci/.github/workflows/check-foundation-linking.yml@8b1b76d6e1aa6f8c65789ee4dc53c3c5d8f2b491
+    permissions:
+      contents: read
+    with:
+      swift_image: swift:6.4

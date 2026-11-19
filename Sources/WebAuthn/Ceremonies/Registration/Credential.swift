@@ -11,7 +11,11 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 /// After a successful registration ceremony we pass this data back to the relying party. It contains all needed
 /// information about a WebAuthn credential for storage in e.g. a database.

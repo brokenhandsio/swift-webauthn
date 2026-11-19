@@ -13,8 +13,12 @@
 
 import Crypto
 import _CryptoExtras
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
-import SwiftCBOR
+#endif
+import CBOR
 
 protocol PublicKey: Sendable {
     var algorithm: COSEAlgorithmIdentifier { get }
@@ -27,7 +31,7 @@ enum CredentialPublicKey: Sendable {
     case ec2(EC2PublicKey)
     case rsa(RSAPublicKeyData)
 
-    var key: PublicKey {
+    var key: any PublicKey {
         switch self {
         case let .okp(key):
             return key
@@ -39,7 +43,10 @@ enum CredentialPublicKey: Sendable {
     }
 
     init(publicKeyBytes: [UInt8]) throws {
-        guard let publicKeyObject = try CBOR.decode(publicKeyBytes, options: CBOROptions(maximumDepth: 16)) else {
+        let publicKeyObject: CBOR
+        do {
+            publicKeyObject = try CBOR.decode(publicKeyBytes, options: CBOROptions(maximumDepth: 16))
+        } catch {
             throw WebAuthnError.badPublicKeyBytes
         }
 
