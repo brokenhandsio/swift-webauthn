@@ -43,7 +43,7 @@ public struct WebAuthnManager: Sendable {
         self.init(configuration: configuration, challengeGenerator: .live)
     }
     
-    package init(configuration: Configuration, challengeGenerator: ChallengeGenerator) {
+    public init(configuration: Configuration, challengeGenerator: ChallengeGenerator) {
         self.configuration = configuration
         self.challengeGenerator = challengeGenerator
     }

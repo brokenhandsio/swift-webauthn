@@ -18,7 +18,7 @@ import Foundation
 #endif
 
 extension KeyedDecodingContainer {
-    func decodeBytesFromURLEncodedBase64(forKey key: KeyedDecodingContainer.Key) throws -> [UInt8] {
+    public func decodeBytesFromURLEncodedBase64(forKey key: KeyedDecodingContainer.Key) throws -> [UInt8] {
         guard let bytes = try decode(
             URLEncodedBase64.self,
             forKey: key
@@ -32,7 +32,7 @@ extension KeyedDecodingContainer {
         return bytes
     }
 
-    func decodeBytesFromURLEncodedBase64IfPresent(forKey key: KeyedDecodingContainer.Key) throws -> [UInt8]? {
+    public func decodeBytesFromURLEncodedBase64IfPresent(forKey key: KeyedDecodingContainer.Key) throws -> [UInt8]? {
         guard let bytes = try decodeIfPresent(
             URLEncodedBase64.self,
             forKey: key
