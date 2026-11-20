@@ -78,3 +78,48 @@ jobs:
       contents: read
     with:
       swift_image: swift:6.4
+
+  # Builds both fuzz targets and replays their committed corpus and saved
+  # crashes once each, mutating nothing. The saved crashes include the inputs
+  # behind GHSA-6hhq-f689-wcc5, so this is also that bug's regression test.
+  #
+  # This lives here rather than in fuzz.yml. GitHub switches off a workflow
+  # that has a schedule after 60 days without repository activity, and that
+  # takes its push and pull_request triggers with it. It stays off when activity
+  # resumes. This workflow has no schedule, so it is never switched off.
+  #
+  # One job per toolchain, looping over the targets, so the instrumented
+  # WebAuthn and swift-crypto builds are shared between them. Both targets run
+  # even after one fails, so a single run reports both.
+  fuzz-replay:
+    name: Fuzz replay (Swift ${{ matrix.swift }})
+    runs-on: ubuntu-latest
+    container: swift:${{ matrix.swift }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        swift: ["6.3", "6.4"]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Build and replay each target
+        working-directory: Fuzzing
+        shell: bash
+        run: |
+          set -uo pipefail
+          failed=()
+          for target in WebAuthnAuthentication WebAuthnRegistration; do
+            echo "::group::$target"
+            if ! swift package --allow-writing-to-package-directory \
+                fuzz "$target" --replay; then
+              echo "::error::$target failed to build or replay"
+              failed+=("$target")
+            fi
+            echo "::endgroup::"
+          done
+          if [ ${#failed[@]} -ne 0 ]; then
+            echo "::error::Failed: ${failed[*]}"
+            exit 1
+          fi

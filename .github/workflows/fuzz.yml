@@ -1,0 +1,68 @@
+# The nightly soak. The replay gate, which builds both targets and re-runs the
+# committed corpus and saved crashes, is the `fuzz-replay` job in main.yml and
+# pull_request.yml.
+#
+# GitHub switches this workflow off after 60 days without repository activity,
+# because it has a schedule, and it stays off until someone turns it back on:
+#
+#   gh workflow enable fuzz.yml
+#
+# That is why nothing that gates a pull request lives here.
+name: Fuzz
+
+permissions:
+  contents: read
+
+on:
+  schedule:
+    # 03:17 UTC daily. Off the hour to avoid GitHub's scheduler backlog.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      seconds:
+        description: "Soak duration per target, in seconds"
+        default: "600"
+
+jobs:
+  soak:
+    name: Soak (${{ matrix.target }})
+    runs-on: ubuntu-latest
+    container: swift:6.3
+    timeout-minutes: 45
+    strategy:
+      # One target crashing must not cancel the others' search.
+      fail-fast: false
+      matrix:
+        target: [WebAuthnAuthentication, WebAuthnRegistration]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Fuzz
+        working-directory: Fuzzing
+        run: |
+          swift package --allow-writing-to-package-directory \
+            fuzz ${{ matrix.target }} \
+            --time ${{ github.event.inputs.seconds || '600' }}
+
+      # The container is discarded when the job ends, so a crashing input that
+      # is not uploaded is lost and the finding is unreproducible.
+      - name: Upload crashing inputs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crashes-${{ matrix.target }}
+          path: Fuzzing/Crashes/${{ matrix.target }}/
+          if-no-files-found: ignore
+
+      # Whatever new coverage the soak found. Not committed automatically: the
+      # working corpus is mostly redundant and wants minimizing first.
+      - name: Upload corpus
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: corpus-${{ matrix.target }}
+          path: Fuzzing/Corpus/${{ matrix.target }}/
+          if-no-files-found: ignore
+          retention-days: 14

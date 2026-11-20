@@ -505,6 +505,47 @@ struct WebAuthnManagerRegistrationTests {
         #expect(credential.aaguid?.bytes == Array(repeating: 0, count: 16))
     }
 
+    // A credential public key consisting of the single byte 0x04 used to crash
+    // the relying party. CBOR reads 0x04 as the integer 4, so the key "decoded",
+    // and a branch meant for raw U2F keys then sliced bytes 1...65 out of a
+    // one-byte array. It must be rejected with an error instead.
+    @Test(arguments: [
+        TestKeyConfiguration.ecdsa,
+        TestKeyConfiguration.rsa,
+    ])
+    func finishRegistrationRejectsOneByteCredentialPublicKey(keyConfiguration: TestKeyConfiguration) async throws {
+        await #expect(throws: WebAuthnError.invalidKeyType) {
+            try await finishRegistration(
+                attestationObject: keyConfiguration.attestationObjectBuilder
+                    .authData { $0.attestedCredData(credentialPublicKey: [0x04]) }
+                    .build()
+                    .cborEncoded
+            )
+        }
+    }
+
+    // The attestation object from the input the registration fuzz target saved
+    // when it found that crash (crash-7ec20b87e8874653d7eab00fd3fbfc0c1cb6b140,
+    // minus the 2 trailing bytes the harness spends choosing the ceremony type
+    // and origin). The file is named for the input as found, before it was
+    // translated to swift-fuzz 1.0's layout, which spends 14 fewer bytes on
+    // those choices. It is the `extensions` seed with the credential public key's
+    // first byte changed from 0xa5 to 0x04. Because the extension-data flag is
+    // set, the rest of the original key is accepted as extension data, so a
+    // one-byte change was enough to reach the crash.
+    @Test
+    func finishRegistrationRejectsFuzzerCrash7ec20b87() async throws {
+        let attestationObject = """
+            a363666d74646e6f6e656761747453746d74a06861757468446174615895a379a6f6eeafb9a55e378c118034e2751e68
+            2fab9f2d30ab13d2125586ce1947c10000000000000000000000000000000000000000001041414141414141fbfbfbfb
+            fbfbfbfb05040402fbfb565656565656565656565656575656fb0b0c0d0e0f101112131415161718191a1b1c1d1e1f22
+            5820202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3fa0
+            """.filter { !$0.isWhitespace }.hexadecimal!
+        await #expect(throws: WebAuthnError.invalidKeyType) {
+            try await finishRegistration(attestationObject: attestationObject)
+        }
+    }
+
     @Test
     func finishRegistrationFuzzying() async throws {
         for _ in 1...50 {

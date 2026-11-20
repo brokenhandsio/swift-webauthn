@@ -51,18 +51,14 @@ enum CredentialPublicKey: Sendable {
             throw WebAuthnError.badPublicKeyBytes
         }
 
-        // A leading 0x04 means we got a public key from an old U2F security key.
-        // https://fidoalliance.org/specs/fido-v2.0-id-20180227/fido-registry-v2.0-id-20180227.html#public-key-representation-formats
-        guard publicKeyBytes[0] != 0x04 else {
-            self = .ec2(
-                EC2PublicKey(
-                    algorithm: .algES256,
-                    curve: .p256,
-                    xCoordinate: Array(publicKeyBytes[1...33]),
-                    yCoordinate: Array(publicKeyBytes[33...65])
-                ))
-            return
-        }
+        // The credential public key is always a COSE_Key (WebAuthn §6.5.1),
+        // U2F authenticators included: the client converts their raw key. The
+        // raw 0x04 || x || y form only exists when a relying party builds it
+        // from this COSE_Key to verify a `fido-u2f` attestation (§8.6).
+        // There used to be a branch here treating a leading 0x04 as a raw U2F
+        // key. A real one never reached it (65 raw bytes are not one CBOR item,
+        // so the decode above throws), but a one-byte key of 0x04 decodes as the
+        // integer 4, and slicing 65 bytes out of it crashed the relying party.
 
         guard let keyTypeRaw = publicKeyObject[COSEKey.kty.cbor],
             case .unsignedInt(let keyTypeInt) = keyTypeRaw,

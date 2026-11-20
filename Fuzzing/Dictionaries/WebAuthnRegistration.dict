@@ -1,0 +1,28 @@
+# CBOR structure the attestation object is built from.
+"\xa3"
+"\xa0"
+"\x58"
+"\x59"
+# The keys every attestation object carries.
+"fmt"
+"attStmt"
+"authData"
+# Formats, each selecting a different verifier.
+"none"
+"packed"
+"tpm"
+"android-key"
+"apple"
+"fido-u2f"
+# COSE key labels.
+"\x01\x02"
+"\x03\x26"
+"alg"
+"sig"
+"x5c"
+# clientDataJSON.
+"webauthn.create"
+"webauthn.get"
+"challenge"
+"origin"
+"crossOrigin"
