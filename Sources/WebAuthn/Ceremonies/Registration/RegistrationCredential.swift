@@ -11,12 +11,13 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Crypto
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import Crypto
 
 /// The unprocessed response received from `navigator.credentials.create()`.
 ///
@@ -33,13 +34,13 @@ public struct RegistrationCredential: Sendable {
 
     /// The attestation response from the authenticator.
     public let attestationResponse: AuthenticatorAttestationResponse
-    
-	public init(id: URLEncodedBase64, type: CredentialType, rawID: [UInt8], attestationResponse: AuthenticatorAttestationResponse) {
-		self.id = id
-		self.type = type
-		self.rawID = rawID
-		self.attestationResponse = attestationResponse
-	}
+
+    public init(id: URLEncodedBase64, type: CredentialType, rawID: [UInt8], attestationResponse: AuthenticatorAttestationResponse) {
+        self.id = id
+        self.type = type
+        self.rawID = rawID
+        self.attestationResponse = attestationResponse
+    }
 }
 
 extension RegistrationCredential: Codable {
@@ -68,7 +69,6 @@ extension RegistrationCredential: Codable {
         try container.encode(attestationResponse, forKey: .attestationResponse)
     }
 
-
     private enum CodingKeys: String, CodingKey {
         case id
         case type
@@ -91,7 +91,7 @@ struct ParsedCredentialCreationResponse {
         id = rawResponse.id
         rawID = Data(rawResponse.rawID)
 
-        guard rawResponse.type == .publicKey 
+        guard rawResponse.type == .publicKey
         else { throw WebAuthnError.invalidCredentialCreationType }
         type = rawResponse.type
 

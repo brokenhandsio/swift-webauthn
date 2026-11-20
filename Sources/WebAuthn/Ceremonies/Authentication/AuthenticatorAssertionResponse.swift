@@ -11,12 +11,13 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Crypto
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import Crypto
 
 /// This is what the authenticator device returned after we requested it to authenticate a user.
 ///
@@ -50,14 +51,15 @@ public struct AuthenticatorAssertionResponse: Sendable {
     ///
     /// When decoding using `Decodable`, this is decoded from base64url to bytes.
     public let attestationObject: [UInt8]?
-    
-	public init(clientDataJSON: [UInt8], authenticatorData: [UInt8], signature: [UInt8], userHandle: [UInt8]?, attestationObject: [UInt8]?) {
-		self.clientDataJSON = clientDataJSON
-		self.authenticatorData = authenticatorData
-		self.signature = signature
-		self.userHandle = userHandle
-		self.attestationObject = attestationObject
-	}
+
+    public init(clientDataJSON: [UInt8], authenticatorData: [UInt8], signature: [UInt8], userHandle: [UInt8]?, attestationObject: [UInt8]?)
+    {
+        self.clientDataJSON = clientDataJSON
+        self.authenticatorData = authenticatorData
+        self.signature = signature
+        self.userHandle = userHandle
+        self.attestationObject = attestationObject
+    }
 }
 
 extension AuthenticatorAssertionResponse: Codable {

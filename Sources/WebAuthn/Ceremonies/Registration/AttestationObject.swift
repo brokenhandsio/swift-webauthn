@@ -11,13 +11,14 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CBOR
+import Crypto
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import Crypto
-import CBOR
 
 /// Contains the cryptographic attestation that a new key pair was created by that authenticator.
 public struct AttestationObject: Sendable {

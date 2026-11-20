@@ -16,7 +16,7 @@ public struct AttestationFormat: UnreferencedStringEnumeration, Sendable {
     public init(_ rawValue: String) {
         self.rawValue = rawValue
     }
-    
+
     public static let packed: Self = "packed"
     public static let tpm: Self = "tpm"
     public static let androidKey: Self = "android-key"

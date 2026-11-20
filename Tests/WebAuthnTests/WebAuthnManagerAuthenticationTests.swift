@@ -11,15 +11,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-@testable import WebAuthn
+import CBOR
+import Crypto
 import Testing
+
+@testable import WebAuthn
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import CBOR
-import Crypto
 
 struct WebAuthnManagerAuthenticationTests {
     var webAuthnManager: WebAuthnManager!
@@ -81,7 +83,7 @@ struct WebAuthnManagerAuthenticationTests {
             )
         }
     }
-    
+
     @Test(arguments: [
         TestKeyConfiguration.ecdsa,
         TestKeyConfiguration.rsa,
@@ -162,7 +164,7 @@ struct WebAuthnManagerAuthenticationTests {
             try finishAuthentication(
                 authenticatorData: TestAuthDataBuilder()
                     .validAuthenticationMock()
-                    .counter([0, 0, 0, 1]) // signCount = 1
+                    .counter([0, 0, 0, 1])  // signCount = 1
                     .build()
                     .byteArrayRepresentation,
                 signature: keyConfiguration.signer.signature,
@@ -181,10 +183,10 @@ struct WebAuthnManagerAuthenticationTests {
         let oldSignCount: UInt32 = 0
 
         let authenticatorData = TestAuthDataBuilder()
-                .validAuthenticationMock()
-                .counter([0, 0, 0, 1])
-                .build()
-                .byteArrayRepresentation
+            .validAuthenticationMock()
+            .counter([0, 0, 0, 1])
+            .build()
+            .byteArrayRepresentation
 
         // Create a signature. This part is usually performed by the authenticator
 

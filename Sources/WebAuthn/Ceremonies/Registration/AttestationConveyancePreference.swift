@@ -19,10 +19,10 @@ public struct AttestationConveyancePreference: UnreferencedStringEnumeration, Se
     public init(_ rawValue: String) {
         self.rawValue = rawValue
     }
-    
+
     /// Indicates the Relying Party is not interested in authenticator attestation.
     public static let none: Self = "none"
-//    public static let indirect: Self = "indirect"
-//    public static let direct: Self = "direct"
-//    public static let enterprise: Self = "enterprise"
+    //    public static let indirect: Self = "indirect"
+    //    public static let direct: Self = "direct"
+    //    public static let enterprise: Self = "enterprise"
 }

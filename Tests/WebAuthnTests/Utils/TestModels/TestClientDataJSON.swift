@@ -11,12 +11,13 @@
 //
 //===----------------------------------------------------------------------===//
 
+import WebAuthn
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import WebAuthn
 
 struct TestClientDataJSON: Encodable {
     var type = "webauthn.create"

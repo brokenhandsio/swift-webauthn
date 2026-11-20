@@ -22,11 +22,11 @@ public struct AuthenticatorAttachment: UnreferencedStringEnumeration, Sendable {
     public init(_ rawValue: String) {
         self.rawValue = rawValue
     }
-    
+
     /// A platform authenticator is attached using a client device-specific transport, called platform attachment, and is usually not removable from the client device. A public key credential bound to a platform authenticator is called a platform credential.
     /// - SeeAlso: [WebAuthn Level 3 Editor's Draft §6.2.1. Authenticator Attachment Modality](https://w3c.github.io/webauthn/#platform-attachment)
     public static let platform: Self = "platform"
-    
+
     /// A roaming authenticator is attached using cross-platform transports, called cross-platform attachment. Authenticators of this class are removable from, and can "roam" between, client devices. A public key credential bound to a roaming authenticator is called a roaming credential.
     /// - SeeAlso: [WebAuthn Level 3 Editor's Draft §6.2.1. Authenticator Attachment Modality](https://w3c.github.io/webauthn/#cross-platform-attachment)
     public static let crossPlatform: Self = "cross-platform"

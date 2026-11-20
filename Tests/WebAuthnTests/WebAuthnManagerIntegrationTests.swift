@@ -11,14 +11,16 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Crypto
+import Testing
+
 @testable import WebAuthn
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import Testing
-import Crypto
 
 struct WebAuthnManagerIntegrationTests {
     // swiftlint:disable:next function_body_length
@@ -66,9 +68,10 @@ struct WebAuthnManagerIntegrationTests {
         let mockClientDataJSON = TestClientDataJSON(challenge: mockChallenge.base64URLEncodedString())
         let mockCredentialPublicKey = keyConfiguration.credentialPublicKey
         let mockAttestationObject = keyConfiguration.attestationObjectBuilder
-            .authData { $0
-                .attestedCredData(credentialPublicKey: mockCredentialPublicKey)
-                .noExtensionData()
+            .authData {
+                $0
+                    .attestedCredData(credentialPublicKey: mockCredentialPublicKey)
+                    .noExtensionData()
             }.build().cborEncoded
 
         let registrationResponse = RegistrationCredential(
@@ -103,10 +106,12 @@ struct WebAuthnManagerIntegrationTests {
         // Step 3.: Begin Authentication
         let authenticationTimeout: Duration = .seconds(4567)
         let userVerification: UserVerificationRequirement = .preferred
-        let rememberedCredentials = [PublicKeyCredentialDescriptor(
-            type: .publicKey,
-            id: [UInt8](URLEncodedBase64(credential.id).urlDecoded.decoded!)
-        )]
+        let rememberedCredentials = [
+            PublicKeyCredentialDescriptor(
+                type: .publicKey,
+                id: [UInt8](URLEncodedBase64(credential.id).urlDecoded.decoded!)
+            )
+        ]
 
         let authenticationOptions = webAuthnManager.beginAuthentication(
             timeout: authenticationTimeout,
@@ -124,7 +129,7 @@ struct WebAuthnManagerIntegrationTests {
         // The following lines reflect what an authenticator normally produces
         let authenticatorData = TestAuthDataBuilder().validAuthenticationMock()
             .relyingPartyIDHash(fromRelyingPartyID: configuration.relyingPartyID)
-            .counter([0, 0, 0, 1]) // we authenticated once now, so authenticator likely increments the sign counter
+            .counter([0, 0, 0, 1])  // we authenticated once now, so authenticator likely increments the sign counter
             .build()
             .byteArrayRepresentation
 

@@ -11,13 +11,14 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CBOR
+import Crypto
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import Crypto
-import CBOR
 
 /// Data created and/ or used by the authenticator during authentication/ registration.
 /// The data contains, for example, whether a user was present or verified.
@@ -53,7 +54,7 @@ extension AuthenticatorData {
             let (data, length) = try Self.parseAttestedData(bytes)
             attestedCredentialData = data
             remainingCount -= length
-        // For assertion signatures, the AT flag MUST NOT be set and the attestedCredentialData MUST NOT be included.
+            // For assertion signatures, the AT flag MUST NOT be set and the attestedCredentialData MUST NOT be included.
         } else {
             if !flags.extensionDataIncluded && bytes.count != minAuthDataLength {
                 throw .attestedCredentialFlagNotSet
@@ -97,7 +98,7 @@ extension AuthenticatorData {
         else { throw .credentialIDTooLong }
 
         let credentialIDEndIndex = Int(idLength) + 55
-        guard data.count >= credentialIDEndIndex 
+        guard data.count >= credentialIDEndIndex
         else { throw .credentialIDTooShort }
 
         /// **credentialId** (L): Credential ID

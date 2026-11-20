@@ -21,7 +21,7 @@ public struct CredentialType: UnreferencedStringEnumeration, Sendable {
     public init(_ rawValue: String) {
         self.rawValue = rawValue
     }
-    
+
     /// A public key credential.
     /// - SeeAlso: [WebAuthn Level 3 Editor's Draft §5.1. PublicKeyCredential Interface](https://w3c.github.io/webauthn/#iface-pkcredential)
     public static let publicKey: Self = "public-key"

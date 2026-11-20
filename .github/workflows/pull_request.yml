@@ -15,7 +15,8 @@ jobs:
     with:
       license_header_check_project_name: "Swift WebAuthn"
       shell_check_enabled: false
-      format_check_enabled: false
+      # Formats and strictly lints every Swift file with swift-format using .swift-format, then fails on any diff.
+      format_check_enabled: true
       docs_check_enabled: false
 
   tests:

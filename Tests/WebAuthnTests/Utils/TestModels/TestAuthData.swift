@@ -11,13 +11,14 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Crypto
+import WebAuthn
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import Crypto
-import WebAuthn
 
 struct TestAuthData {
     var relyingPartyIDHash: [UInt8]?
@@ -74,7 +75,7 @@ struct TestAuthDataBuilder {
             )
             .extensions([UInt8](repeating: 0, count: 20))
     }
-    
+
     func validMockRSA() -> Self {
         self
             .relyingPartyIDHash(fromRelyingPartyID: "example.com")
@@ -153,7 +154,7 @@ struct TestAuthDataBuilder {
 
     func noExtensionData() -> Self {
         var temp = self
-        temp.wrapped.flags = temp.wrapped.flags.map{ $0 & 0b01111111 }
+        temp.wrapped.flags = temp.wrapped.flags.map { $0 & 0b01111111 }
         temp.wrapped.extensions = nil
         return temp
     }

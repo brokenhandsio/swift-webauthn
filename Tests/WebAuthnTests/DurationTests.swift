@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 import Testing
+
 @testable import WebAuthn
 
 struct DurationTests {

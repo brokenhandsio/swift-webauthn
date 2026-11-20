@@ -11,9 +11,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-import WebAuthn
 import CBOR
 import Testing
+import WebAuthn
 
 // protocol AttestationObjectParameter: CBOR {}
 
@@ -21,7 +21,7 @@ struct TestAttestationObject {
     var fmt: CBOR?
     var attStmt: CBOR?
     var authData: AuthData = .none
-    
+
     enum AuthData {
         case structured(TestAuthData)
         case cbor(CBOR)
@@ -67,7 +67,7 @@ struct TestAttestationObjectBuilder {
         temp.wrapped.authData = .structured(TestAuthDataBuilder().validMockECDSA().build())
         return temp
     }
-    
+
     func validMockRSA() -> Self {
         var temp = self.keyAgnosticBase()
         temp.wrapped.authData = .structured(TestAuthDataBuilder().validMockRSA().build())
@@ -147,7 +147,7 @@ struct TestAttestationObjectBuilder {
         temp.wrapped.authData = .structured(builder.build())
         return temp
     }
-    
+
     func authData(builder: (TestAuthDataBuilder) -> TestAuthDataBuilder) -> Self {
         var temp = self
         switch temp.wrapped.authData {

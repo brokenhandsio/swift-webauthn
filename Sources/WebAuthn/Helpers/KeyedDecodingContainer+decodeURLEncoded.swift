@@ -19,10 +19,12 @@ import Foundation
 
 extension KeyedDecodingContainer {
     func decodeBytesFromURLEncodedBase64(forKey key: KeyedDecodingContainer.Key) throws -> [UInt8] {
-        guard let bytes = try decode(
-            URLEncodedBase64.self,
-            forKey: key
-        ).decodedBytes else {
+        guard
+            let bytes = try decode(
+                URLEncodedBase64.self,
+                forKey: key
+            ).decodedBytes
+        else {
             throw DecodingError.dataCorruptedError(
                 forKey: key,
                 in: self,
@@ -33,10 +35,12 @@ extension KeyedDecodingContainer {
     }
 
     func decodeBytesFromURLEncodedBase64IfPresent(forKey key: KeyedDecodingContainer.Key) throws -> [UInt8]? {
-        guard let bytes = try decodeIfPresent(
-            URLEncodedBase64.self,
-            forKey: key
-        ) else { return nil }
+        guard
+            let bytes = try decodeIfPresent(
+                URLEncodedBase64.self,
+                forKey: key
+            )
+        else { return nil }
 
         guard let decodedBytes = bytes.decodedBytes else {
             throw DecodingError.dataCorruptedError(

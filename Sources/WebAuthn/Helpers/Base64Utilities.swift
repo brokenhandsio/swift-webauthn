@@ -11,12 +11,13 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Logging
+
 #if canImport(FoundationEssentials)
 public import FoundationEssentials
 #else
 public import Foundation
 #endif
-import Logging
 
 /// Container for base64 encoded data
 public struct EncodedBase64: ExpressibleByStringLiteral, Codable, Hashable, Equatable, Sendable {
