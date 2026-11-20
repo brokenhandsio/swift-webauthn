@@ -31,3 +31,8 @@ Package.resolved
 **/ResourcePackaging/hello.txt
 .mailmap
 .swiftformat
+Fuzzing/Corpus/*
+Fuzzing/Seeds/*
+Fuzzing/Crashes/*
+Fuzzing/Dictionaries/*
+Fuzzing/FuzzTargets/*Shim/shim.c

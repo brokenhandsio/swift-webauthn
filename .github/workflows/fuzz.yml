@@ -1,12 +1,19 @@
+# The nightly soak. The replay gate, which builds both targets and re-runs the
+# committed corpus and saved crashes, is the `fuzz-replay` job in main.yml and
+# pull_request.yml.
+#
+# GitHub switches this workflow off after 60 days without repository activity,
+# because it has a schedule, and it stays off until someone turns it back on:
+#
+#   gh workflow enable fuzz.yml
+#
+# That is why nothing that gates a pull request lives here.
 name: Fuzz
 
 permissions:
   contents: read
 
 on:
-  push:
-    branches: [main]
-  pull_request:
   schedule:
     # 03:17 UTC daily. Off the hour to avoid GitHub's scheduler backlog.
     - cron: "17 3 * * *"
@@ -16,41 +23,9 @@ on:
         description: "Soak duration per target, in seconds"
         default: "600"
 
-concurrency:
-  # Scheduled soaks are keyed per-run so a nightly is never cancelled by a push.
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'schedule' && github.run_id || '' }}
-  cancel-in-progress: true
-
 jobs:
-  # Fast regression gate: replays the committed corpus and every saved crash
-  # artefact once each, mutating nothing. Seconds, not minutes.
-  #
-  # It runs on the schedule too. The soak starts from the corpus but never
-  # replays Crashes/, so without this a regression against a previously-fixed
-  # bug would not be caught by the nightly.
-  replay:
-    name: Replay (${{ matrix.target }})
-    runs-on: ubuntu-latest
-    container: swift:6.3
-    strategy:
-      fail-fast: false
-      matrix:
-        target: [WebAuthnAuthentication, WebAuthnRegistration]
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-
-      - name: Replay corpus and saved crashes
-        working-directory: Fuzzing
-        run: |
-          swift package --allow-writing-to-package-directory \
-            fuzz ${{ matrix.target }} --replay
-
   soak:
     name: Soak (${{ matrix.target }})
-    # Nightly and on demand only; pushes and pull requests get the replay gate.
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     container: swift:6.3
     timeout-minutes: 45
