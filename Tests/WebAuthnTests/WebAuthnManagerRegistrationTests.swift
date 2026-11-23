@@ -385,6 +385,7 @@ struct WebAuthnManagerRegistrationTests {
     func finishAuthenticationFailsIfCredentialIDTooLong(keyConfiguration: TestKeyConfiguration) async throws {
         /// This should succeed as it's on the border of being acceptable
         _ = try await finishRegistration(
+            credentialID: CredentialID(bytes: [UInt8](repeating: 0, count: 1023)),
             attestationObject: keyConfiguration.attestationObjectBuilder
                 .authData {
                     $0
@@ -421,7 +422,7 @@ struct WebAuthnManagerRegistrationTests {
         TestKeyConfiguration.rsa,
     ])
     func finishRegistrationSucceeds(keyConfiguration: TestKeyConfiguration) async throws {
-        let credentialID = CredentialID(bytes: [0, 1, 0, 1, 0, 1])
+        let credentialID = CredentialID(bytes: [0b00000001])
         let credentialPublicKey: [UInt8] = keyConfiguration.credentialPublicKey
         let authData = keyConfiguration.authDataBuilder
             .attestedCredData(credentialPublicKey: credentialPublicKey)
@@ -446,7 +447,7 @@ struct WebAuthnManagerRegistrationTests {
     ])
     func credentialAAGUIDAccessorReturnsCorrectValue(keyConfiguration: TestKeyConfiguration) async throws {
         let testAAGUID = AAGUID(uuidString: "dd4ec289-e01d-41c9-bb89-70fa845d4bf2")!
-        let credentialID = CredentialID(bytes: [0, 1, 0, 1, 0, 1])
+        let credentialID = CredentialID(bytes: [0b00000001])
         let credentialPublicKey: [UInt8] = keyConfiguration.credentialPublicKey
         let authData = keyConfiguration.authDataBuilder
             .attestedCredData(
@@ -484,7 +485,7 @@ struct WebAuthnManagerRegistrationTests {
     ])
     func credentialAAGUIDAccessorReturnsAnonymousByDefault(keyConfiguration: TestKeyConfiguration) async throws {
         // When no AAGUID is specified, it defaults to .anonymous
-        let credentialID = CredentialID(bytes: [0, 1, 0, 1, 0, 1])
+        let credentialID = CredentialID(bytes: [0b00000001])
         let credentialPublicKey: [UInt8] = keyConfiguration.credentialPublicKey
         let authData = keyConfiguration.authDataBuilder
             .attestedCredData(credentialPublicKey: credentialPublicKey)  // Uses .anonymous by default
@@ -559,7 +560,7 @@ struct WebAuthnManagerRegistrationTests {
     private func finishRegistration(
         challenge: [UInt8] = TestConstants.mockChallenge,
         type: CredentialType = .publicKey,
-        credentialID: CredentialID = CredentialID(base64URLEncoded: "e0fac9350509f71748d83782ccaf6b4c1462c615c70e255da1344e40887c8fcd")!,
+        credentialID: CredentialID = CredentialID(bytes: [0b00000001]),
         clientDataJSON: [UInt8] = TestClientDataJSON().jsonBytes,
         attestationObject: [UInt8],
         requireUserVerification: Bool = false,

@@ -64,7 +64,7 @@ struct WebAuthnManagerIntegrationTests {
 
         // Now send `registrationOptions` to client, which in turn will send the authenticator's response back to us:
         // The following lines reflect what an authenticator normally produces
-        let mockCredentialID = CredentialID(bytes: [UInt8](repeating: 1, count: 10))
+        let mockCredentialID = CredentialID(bytes: [0b00000001])
         let mockClientDataJSON = TestClientDataJSON(challenge: mockChallenge.base64URLEncodedString())
         let mockCredentialPublicKey = keyConfiguration.credentialPublicKey
         let mockAttestationObject = keyConfiguration.attestationObjectBuilder
