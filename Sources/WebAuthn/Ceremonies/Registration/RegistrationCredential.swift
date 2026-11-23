@@ -43,8 +43,8 @@ extension RegistrationCredential: Codable {
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        let id = try Self.decodeCredentialID(from: container, forKey: .id)
-        let rawID = try Self.decodeCredentialID(from: container, forKey: .rawID)
+        let id = try container.decodeCredentialID(forKey: .id)
+        let rawID = try container.decodeCredentialID(forKey: .rawID)
         guard id == rawID else {
             throw DecodingError.dataCorruptedError(
                 forKey: .rawID,
@@ -65,21 +65,6 @@ extension RegistrationCredential: Codable {
         try container.encode(type, forKey: .type)
         try container.encode(encodedID, forKey: .rawID)
         try container.encode(attestationResponse, forKey: .attestationResponse)
-    }
-
-    private static func decodeCredentialID(
-        from container: KeyedDecodingContainer<CodingKeys>,
-        forKey key: CodingKeys
-    ) throws -> CredentialID {
-        let encoded = try container.decode(String.self, forKey: key)
-        guard let id = CredentialID(base64URLEncoded: encoded) else {
-            throw DecodingError.dataCorruptedError(
-                forKey: key,
-                in: container,
-                debugDescription: "Failed to decode canonical base64url encoded credential ID"
-            )
-        }
-        return id
     }
 
     private enum CodingKeys: String, CodingKey {

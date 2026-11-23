@@ -170,7 +170,6 @@ extension PublicKeyCredentialDescriptor: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         self.type = try container.decode(CredentialType.self, forKey: .type)
-        // TODO migrate?
         let bytes = try container.decodeBytesFromURLEncodedBase64(forKey: .id)
         self.id = CredentialID(bytes: bytes)
         self.transports = try container.decodeIfPresent([AuthenticatorTransport].self, forKey: .transports) ?? []
