@@ -51,18 +51,4 @@ extension KeyedDecodingContainer {
         }
         return decodedBytes
     }
-
-    func decodeCredentialID(
-        forKey key: KeyedDecodingContainer.Key
-    ) throws -> CredentialID {
-        let encoded = try decode(String.self, forKey: key)
-        guard let id = CredentialID(base64URLEncoded: encoded) else {
-            throw DecodingError.dataCorruptedError(
-                forKey: key,
-                in: self,
-                debugDescription: "Failed to decode canonical base64url encoded credential ID"
-            )
-        }
-        return id
-    }
 }

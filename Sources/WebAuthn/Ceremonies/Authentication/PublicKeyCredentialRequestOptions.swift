@@ -170,8 +170,7 @@ extension PublicKeyCredentialDescriptor: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         self.type = try container.decode(CredentialType.self, forKey: .type)
-        let bytes = try container.decodeBytesFromURLEncodedBase64(forKey: .id)
-        self.id = CredentialID(bytes: bytes)
+        self.id = try container.decode(CredentialID.self, forKey: .id)
         self.transports = try container.decodeIfPresent([AuthenticatorTransport].self, forKey: .transports) ?? []
     }
 
@@ -179,7 +178,7 @@ extension PublicKeyCredentialDescriptor: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(type, forKey: .type)
-        try container.encode(id.base64URLEncoded, forKey: .id)
+        try container.encode(id, forKey: .id)
         try container.encodeIfPresent(transports, forKey: .transports)
     }
 

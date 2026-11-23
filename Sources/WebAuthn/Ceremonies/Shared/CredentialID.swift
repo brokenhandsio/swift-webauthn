@@ -40,7 +40,32 @@ public struct CredentialID: Hashable, Sendable {
         borrowing get { storage.span }
     }
 
+    /// A copy of the credential ID's bytes, for example to store in a binary database column.
+    public var byteArray: [UInt8] {
+        Array(storage)
+    }
+
     public var base64URLEncoded: URLEncodedBase64 {
         EncodedBase64(Data(storage).base64EncodedString()).urlEncoded
+    }
+}
+
+/// Encodes as a canonical, unpadded base64url string. Decoding rejects any other encoding.
+extension CredentialID: Codable {
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let encoded = try container.decode(String.self)
+        guard let id = CredentialID(base64URLEncoded: encoded) else {
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Failed to decode canonical base64url encoded credential ID"
+            )
+        }
+        self = id
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(base64URLEncoded.asString())
     }
 }

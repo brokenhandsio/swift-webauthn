@@ -43,8 +43,8 @@ extension RegistrationCredential: Codable {
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        let id = try container.decodeCredentialID(forKey: .id)
-        let rawID = try container.decodeCredentialID(forKey: .rawID)
+        let id = try container.decode(CredentialID.self, forKey: .id)
+        let rawID = try container.decode(CredentialID.self, forKey: .rawID)
         guard id == rawID else {
             throw DecodingError.dataCorruptedError(
                 forKey: .rawID,
@@ -59,11 +59,10 @@ extension RegistrationCredential: Codable {
 
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        let encodedID = id.base64URLEncoded
 
-        try container.encode(encodedID, forKey: .id)
+        try container.encode(id, forKey: .id)
         try container.encode(type, forKey: .type)
-        try container.encode(encodedID, forKey: .rawID)
+        try container.encode(id, forKey: .rawID)
         try container.encode(attestationResponse, forKey: .attestationResponse)
     }
 

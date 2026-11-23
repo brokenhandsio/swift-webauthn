@@ -78,6 +78,66 @@ struct CredentialIDTests {
         #expect(CredentialID(base64URLEncoded: encoded) == nil)
     }
 
+    // MARK: - byteArray
+
+    @Test(arguments: [[], [0x01], [0xfb, 0xff, 0xfe, 0x01]] as [[UInt8]])
+    func byteArrayReturnsTheCredentialIDBytes(bytes: [UInt8]) {
+        #expect(CredentialID(bytes: bytes).byteArray == bytes)
+    }
+
+    // MARK: - Codable
+
+    private struct IDContainer: Codable {
+        let id: CredentialID
+    }
+
+    @Test
+    func encodesAsBase64URLString() throws {
+        let container = IDContainer(id: CredentialID(bytes: [0xfb, 0xff, 0xfe, 0x01]))
+        let encoded = try JSONEncoder().encode(container)
+
+        #expect(String(decoding: encoded, as: UTF8.self) == #"{"id":"-__-AQ"}"#)
+        #expect(try JSONDecoder().decode(IDContainer.self, from: encoded).id == container.id)
+    }
+
+    @Test(arguments: CredentialIDTests.invalidEncodedIDs)
+    func decodingRejectsInvalidOrNonCanonicalBase64URL(encoded: String) throws {
+        let data = try JSONEncoder().encode(["id": encoded])
+
+        #expect(throws: DecodingError.self) {
+            try JSONDecoder().decode(IDContainer.self, from: data)
+        }
+    }
+
+    @Test
+    func decodingRejectsNonStringValues() {
+        #expect(throws: DecodingError.self) {
+            try JSONDecoder().decode(IDContainer.self, from: Data(#"{"id":[1,2,3]}"#.utf8))
+        }
+    }
+
+    // MARK: - PublicKeyCredentialDescriptor
+
+    @Test
+    func descriptorRoundTripsCredentialID() throws {
+        let descriptor = PublicKeyCredentialDescriptor(id: CredentialID(bytes: [0xfb, 0xff, 0xfe, 0x01]))
+        let decoded = try JSONDecoder().decode(
+            PublicKeyCredentialDescriptor.self,
+            from: JSONEncoder().encode(descriptor)
+        )
+
+        #expect(decoded == descriptor)
+    }
+
+    @Test(arguments: CredentialIDTests.invalidEncodedIDs)
+    func descriptorRejectsInvalidOrNonCanonicalIDs(encoded: String) throws {
+        let data = try JSONEncoder().encode(["type": "public-key", "id": encoded])
+
+        #expect(throws: DecodingError.self) {
+            try JSONDecoder().decode(PublicKeyCredentialDescriptor.self, from: data)
+        }
+    }
+
     // MARK: - RegistrationCredential
 
     @Test
