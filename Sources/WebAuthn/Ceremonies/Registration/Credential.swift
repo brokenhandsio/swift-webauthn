@@ -24,7 +24,7 @@ public struct Credential: Sendable {
     public let type: CredentialType
 
     /// base64 encoded String of the credential ID bytes
-    public let id: String
+    public let id: CredentialID
 
     /// The public key for this certificate
     public let publicKey: [UInt8]

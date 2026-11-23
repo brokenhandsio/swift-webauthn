@@ -120,14 +120,14 @@ public struct WebAuthnManager: Sendable {
         // TODO: Step 18. -> Verify client extensions
 
         // Step 24.
-        guard try await confirmCredentialIDNotRegisteredYet(parsedData.id.asString()) else {
+        guard try await confirmCredentialIDNotRegisteredYet(parsedData.id.base64URLEncoded.asString()) else {
             throw WebAuthnError.credentialIDAlreadyExists
         }
 
         // Step 25.
         return Credential(
             type: parsedData.type,
-            id: parsedData.id.urlDecoded.asString(),
+            id: parsedData.id,
             publicKey: attestedCredentialData.publicKey,
             signCount: parsedData.response.attestationObject.authenticatorData.counter,
             backupEligible: parsedData.response.attestationObject.authenticatorData.flags.isBackupEligible,

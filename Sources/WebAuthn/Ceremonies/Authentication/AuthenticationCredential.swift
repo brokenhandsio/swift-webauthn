@@ -22,10 +22,7 @@ import Foundation
 /// When decoding using `Decodable`, the `rawID` is decoded from base64url to bytes.
 public struct AuthenticationCredential: Sendable {
     /// The credential ID of the newly created credential.
-    public let id: URLEncodedBase64
-
-    /// The raw credential ID of the newly created credential.
-    public let rawID: [UInt8]
+    public let id: CredentialID
 
     /// The attestation response from the authenticator.
     public let response: AuthenticatorAssertionResponse
@@ -38,11 +35,10 @@ public struct AuthenticationCredential: Sendable {
     public let type: CredentialType
 
     public init(
-        id: URLEncodedBase64, rawID: [UInt8], response: AuthenticatorAssertionResponse, authenticatorAttachment: AuthenticatorAttachment?,
+        id: CredentialID, response: AuthenticatorAssertionResponse, authenticatorAttachment: AuthenticatorAttachment?,
         type: CredentialType
     ) {
         self.id = id
-        self.rawID = rawID
         self.response = response
         self.authenticatorAttachment = authenticatorAttachment
         self.type = type
@@ -53,8 +49,17 @@ extension AuthenticationCredential: Codable {
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        id = try container.decode(URLEncodedBase64.self, forKey: .id)
-        rawID = try container.decodeBytesFromURLEncodedBase64(forKey: .rawID)
+        let id = try Self.decodeCredentialID(from: container, forKey: .id)
+        let rawID = try Self.decodeCredentialID(from: container, forKey: .rawID)
+        guard id == rawID else {
+            throw DecodingError.dataCorruptedError(
+                forKey: .rawID,
+                in: container,
+                debugDescription: "rawId does not match id"
+            )
+        }
+
+        self.id = id
         response = try container.decode(AuthenticatorAssertionResponse.self, forKey: .response)
         authenticatorAttachment = try container.decodeIfPresent(AuthenticatorAttachment.self, forKey: .authenticatorAttachment)
         type = try container.decode(CredentialType.self, forKey: .type)
@@ -62,12 +67,28 @@ extension AuthenticationCredential: Codable {
 
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        let encodedID = id.base64URLEncoded
 
-        try container.encode(id, forKey: .id)
-        try container.encode(rawID.base64URLEncodedString(), forKey: .rawID)
+        try container.encode(encodedID, forKey: .id)
+        try container.encode(encodedID, forKey: .rawID)
         try container.encode(response, forKey: .response)
         try container.encodeIfPresent(authenticatorAttachment, forKey: .authenticatorAttachment)
         try container.encode(type, forKey: .type)
+    }
+
+    private static func decodeCredentialID(
+        from container: KeyedDecodingContainer<CodingKeys>,
+        forKey key: CodingKeys
+    ) throws -> CredentialID {
+        let encoded = try container.decode(String.self, forKey: key)
+        guard let id = CredentialID(base64URLEncoded: encoded) else {
+            throw DecodingError.dataCorruptedError(
+                forKey: key,
+                in: container,
+                debugDescription: "Failed to decode canonical base64url encoded credential ID"
+            )
+        }
+        return id
     }
 
     private enum CodingKeys: String, CodingKey {
