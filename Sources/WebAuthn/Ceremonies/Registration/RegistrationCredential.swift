@@ -127,7 +127,7 @@ struct ParsedCredentialCreationResponse {
 
         // Step 23.
         guard id.bytes.count <= 1023 else {
-            throw WebAuthnError.credentialRawIDTooLong
+            throw WebAuthnError.credentialIDTooLong
         }
 
         // The client-supplied ID isn't covered by the attestation, so it must match the authenticator data.

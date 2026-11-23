@@ -369,8 +369,8 @@ struct WebAuthnManagerRegistrationTests {
         TestKeyConfiguration.ecdsa,
         TestKeyConfiguration.rsa,
     ])
-    func finishRegistrationFailsIfRawIDIsTooLong(keyConfiguration: TestKeyConfiguration) async throws {
-        await #expect(throws: WebAuthnError.credentialRawIDTooLong) {
+    func finishRegistrationFailsIfIDIsTooLong(keyConfiguration: TestKeyConfiguration) async throws {
+        await #expect(throws: WebAuthnError.credentialIDTooLong) {
             try await finishRegistration(
                 credentialID: CredentialID(bytes: [UInt8](repeating: 0, count: 1024)),
                 attestationObject: keyConfiguration.attestationObject

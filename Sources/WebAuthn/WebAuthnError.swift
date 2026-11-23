@@ -42,7 +42,6 @@ public enum WebAuthnError: Error, Hashable, Sendable {
 
     // MARK: ParsedCredentialCreationResponse
     case invalidCredentialCreationType
-    case credentialRawIDTooLong
     case credentialIDMismatch
 
     // MARK: AuthenticatorData
