@@ -131,7 +131,7 @@ struct ParsedCredentialCreationResponse {
         }
 
         // The client-supplied ID isn't covered by the attestation, so it must match the authenticator data.
-        guard id == CredentialID(bytes: attestedCredentialData.credentialID) else {
+        guard id == attestedCredentialData.credentialID else {
             throw WebAuthnError.credentialIDMismatch
         }
 
