@@ -1,0 +1,1 @@
+- Add `excludeCredentials` to registration options so clients don't re-register an authenticator the user already has
