@@ -149,14 +149,14 @@ public struct PublicKeyCredentialDescriptor: Equatable, Sendable {
     /// The sequence of bytes representing the credential's ID
     ///
     /// When encoding using `Encodable`, this is encoded as base64url.
-    public let id: [UInt8]
+    public let id: CredentialID
 
     /// The types of connections to the client/browser the authenticator supports
     public let transports: [AuthenticatorTransport]
 
     public init(
         type: CredentialType = .publicKey,
-        id: [UInt8],
+        id: CredentialID,
         transports: [AuthenticatorTransport] = []
     ) {
         self.type = type
@@ -170,7 +170,9 @@ extension PublicKeyCredentialDescriptor: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         self.type = try container.decode(CredentialType.self, forKey: .type)
-        self.id = try container.decodeBytesFromURLEncodedBase64(forKey: .id)
+        // TODO migrate?
+        let bytes = try container.decodeBytesFromURLEncodedBase64(forKey: .id)
+        self.id = CredentialID(bytes: bytes)
         self.transports = try container.decodeIfPresent([AuthenticatorTransport].self, forKey: .transports) ?? []
     }
 
@@ -178,7 +180,7 @@ extension PublicKeyCredentialDescriptor: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(type, forKey: .type)
-        try container.encode(id.base64URLEncodedString(), forKey: .id)
+        try container.encode(id.base64URLEncoded, forKey: .id)
         try container.encodeIfPresent(transports, forKey: .transports)
     }
 

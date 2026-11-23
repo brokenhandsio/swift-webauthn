@@ -64,7 +64,7 @@ struct WebAuthnManagerIntegrationTests {
 
         // Now send `registrationOptions` to client, which in turn will send the authenticator's response back to us:
         // The following lines reflect what an authenticator normally produces
-        let mockCredentialID = [UInt8](repeating: 1, count: 10)
+        let mockCredentialID = CredentialID(bytes: [UInt8](repeating: 1, count: 10))
         let mockClientDataJSON = TestClientDataJSON(challenge: mockChallenge.base64URLEncodedString())
         let mockCredentialPublicKey = keyConfiguration.credentialPublicKey
         let mockAttestationObject = keyConfiguration.attestationObjectBuilder
@@ -75,9 +75,8 @@ struct WebAuthnManagerIntegrationTests {
             }.build().cborEncoded
 
         let registrationResponse = RegistrationCredential(
-            id: mockCredentialID.base64URLEncodedString(),
+            id: mockCredentialID,
             type: .publicKey,
-            rawID: mockCredentialID,
             attestationResponse: AuthenticatorAttestationResponse(
                 clientDataJSON: mockClientDataJSON.jsonBytes,
                 attestationObject: mockAttestationObject
@@ -94,7 +93,7 @@ struct WebAuthnManagerIntegrationTests {
             confirmCredentialIDNotRegisteredYet: { _ in true }
         )
 
-        #expect(credential.id == mockCredentialID.base64EncodedString().asString())
+        #expect(credential.id == mockCredentialID)
         #expect(credential.attestationClientDataJSON.type == .create)
         #expect(credential.attestationClientDataJSON.origin == mockClientDataJSON.origin)
         #expect(credential.attestationClientDataJSON.challenge == mockChallenge.base64URLEncodedString())
@@ -109,7 +108,7 @@ struct WebAuthnManagerIntegrationTests {
         let rememberedCredentials = [
             PublicKeyCredentialDescriptor(
                 type: .publicKey,
-                id: [UInt8](URLEncodedBase64(credential.id).urlDecoded.decoded!)
+                id: credential.id
             )
         ]
 
@@ -147,8 +146,7 @@ struct WebAuthnManagerIntegrationTests {
         let signature = try keyConfiguration.signer.sign(data: signatureBase)
 
         let authenticationCredential = AuthenticationCredential(
-            id: mockCredentialID.base64URLEncodedString(),
-            rawID: mockCredentialID,
+            id: mockCredentialID,
             response: AuthenticatorAssertionResponse(
                 clientDataJSON: clientData,
                 authenticatorData: authenticatorData,
@@ -173,7 +171,7 @@ struct WebAuthnManagerIntegrationTests {
         #expect(successfullAuthentication.newSignCount == 1)
         #expect(successfullAuthentication.credentialBackedUp == false)
         #expect(successfullAuthentication.credentialDeviceType == .singleDevice)
-        #expect(successfullAuthentication.credentialID == mockCredentialID.base64URLEncodedString())
+        #expect(successfullAuthentication.credentialID == mockCredentialID)
 
         // We did it!
     }
