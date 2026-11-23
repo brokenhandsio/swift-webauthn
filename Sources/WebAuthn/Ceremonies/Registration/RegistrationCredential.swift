@@ -145,6 +145,11 @@ struct ParsedCredentialCreationResponse {
             throw WebAuthnError.credentialRawIDTooLong
         }
 
+        // The client-supplied ID isn't covered by the attestation, so it must match the authenticator data.
+        guard id == CredentialID(bytes: attestedCredentialData.credentialID) else {
+            throw WebAuthnError.credentialIDMismatch
+        }
+
         return attestedCredentialData
     }
 }

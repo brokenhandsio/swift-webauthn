@@ -105,7 +105,7 @@ public struct WebAuthnManager: Sendable {
         requireUserVerification: Bool = false,
         supportedPublicKeyAlgorithms: [PublicKeyCredentialParameters] = .supported,
         pemRootCertificatesByFormat: [AttestationFormat: [Data]] = [:],
-        confirmCredentialIDNotRegisteredYet: (String) async throws -> Bool
+        confirmCredentialIDNotRegisteredYet: (CredentialID) async throws -> Bool
     ) async throws -> Credential {
         let parsedData = try ParsedCredentialCreationResponse(from: credentialCreationData)
         let attestedCredentialData = try await parsedData.verify(
@@ -120,7 +120,7 @@ public struct WebAuthnManager: Sendable {
         // TODO: Step 18. -> Verify client extensions
 
         // Step 24.
-        guard try await confirmCredentialIDNotRegisteredYet(parsedData.id.base64URLEncoded.asString()) else {
+        guard try await confirmCredentialIDNotRegisteredYet(parsedData.id) else {
             throw WebAuthnError.credentialIDAlreadyExists
         }
 

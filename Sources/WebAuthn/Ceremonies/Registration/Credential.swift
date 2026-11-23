@@ -23,7 +23,7 @@ public struct Credential: Sendable {
     /// Value will always be ``CredentialType/publicKey`` (for now)
     public let type: CredentialType
 
-    /// base64 encoded String of the credential ID bytes
+    /// The ID of the Credential
     public let id: CredentialID
 
     /// The public key for this certificate
