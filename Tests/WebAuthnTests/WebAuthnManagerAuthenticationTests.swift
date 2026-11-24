@@ -42,7 +42,7 @@ struct WebAuthnManagerAuthenticationTests {
 
     @Test
     func beginAuthentication() async throws {
-        let allowCredentials: [PublicKeyCredentialDescriptor] = [.init(type: .publicKey, id: [1, 0, 2, 30])]
+        let allowCredentials: [PublicKeyCredentialDescriptor] = [.init(type: .publicKey, id: CredentialID(bytes: [1, 0, 2, 30]))]
         let options = webAuthnManager.beginAuthentication(
             timeout: .seconds(1234),
             allowCredentials: allowCredentials,
@@ -207,13 +207,13 @@ struct WebAuthnManagerAuthenticationTests {
             credentialCurrentSignCount: oldSignCount
         )
 
-        #expect(verifiedAuthentication.credentialID == credentialID.base64URLEncodedString())
+        #expect(verifiedAuthentication.credentialID == credentialID)
         #expect(verifiedAuthentication.newSignCount == oldSignCount + 1)
     }
 
     /// Using the default parameters `finishAuthentication` should succeed.
     private func finishAuthentication(
-        credentialID: [UInt8] = TestConstants.mockCredentialID,
+        credentialID: CredentialID = TestConstants.mockCredentialID,
         clientDataJSON: [UInt8] = TestClientDataJSON(type: "webauthn.get").jsonBytes,
         authenticatorData: [UInt8] = TestAuthDataBuilder().validAuthenticationMock().build().byteArrayRepresentation,
         signature: [UInt8],
@@ -228,8 +228,7 @@ struct WebAuthnManagerAuthenticationTests {
     ) throws -> VerifiedAuthentication {
         try webAuthnManager.finishAuthentication(
             credential: AuthenticationCredential(
-                id: credentialID.base64URLEncodedString(),
-                rawID: credentialID,
+                id: credentialID,
                 response: AuthenticatorAssertionResponse(
                     clientDataJSON: clientDataJSON,
                     authenticatorData: authenticatorData,

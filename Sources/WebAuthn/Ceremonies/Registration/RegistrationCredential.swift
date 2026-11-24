@@ -21,24 +21,20 @@ import Foundation
 
 /// The unprocessed response received from `navigator.credentials.create()`.
 ///
-/// When decoding using `Decodable`, the `rawID` is decoded from base64url to bytes.
+/// When decoding using `Decodable`, `id` and `rawId` must be the same canonical base64url-encoded credential ID.
 public struct RegistrationCredential: Sendable {
     /// The credential ID of the newly created credential.
-    public let id: URLEncodedBase64
+    public let id: CredentialID
 
     /// Value will always be ``CredentialType/publicKey`` (for now)
     public let type: CredentialType
 
-    /// The raw credential ID of the newly created credential.
-    public let rawID: [UInt8]
-
     /// The attestation response from the authenticator.
     public let attestationResponse: AuthenticatorAttestationResponse
 
-    public init(id: URLEncodedBase64, type: CredentialType, rawID: [UInt8], attestationResponse: AuthenticatorAttestationResponse) {
+    public init(id: CredentialID, type: CredentialType, attestationResponse: AuthenticatorAttestationResponse) {
         self.id = id
         self.type = type
-        self.rawID = rawID
         self.attestationResponse = attestationResponse
     }
 }
@@ -47,16 +43,17 @@ extension RegistrationCredential: Codable {
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        id = try container.decode(URLEncodedBase64.self, forKey: .id)
-        type = try container.decode(CredentialType.self, forKey: .type)
-        guard let rawID = try container.decode(URLEncodedBase64.self, forKey: .rawID).decodedBytes else {
+        let id = try container.decode(CredentialID.self, forKey: .id)
+        let rawID = try container.decode(CredentialID.self, forKey: .rawID)
+        guard id == rawID else {
             throw DecodingError.dataCorruptedError(
                 forKey: .rawID,
                 in: container,
-                debugDescription: "Failed to decode base64url encoded rawID into bytes"
+                debugDescription: "rawId does not match id"
             )
         }
-        self.rawID = rawID
+        self.id = id
+        type = try container.decode(CredentialType.self, forKey: .type)
         attestationResponse = try container.decode(AuthenticatorAttestationResponse.self, forKey: .attestationResponse)
     }
 
@@ -65,7 +62,7 @@ extension RegistrationCredential: Codable {
 
         try container.encode(id, forKey: .id)
         try container.encode(type, forKey: .type)
-        try container.encode(rawID.base64URLEncodedString(), forKey: .rawID)
+        try container.encode(id, forKey: .rawID)
         try container.encode(attestationResponse, forKey: .attestationResponse)
     }
 
@@ -79,8 +76,7 @@ extension RegistrationCredential: Codable {
 
 /// The processed response received from `navigator.credentials.create()`.
 struct ParsedCredentialCreationResponse {
-    let id: URLEncodedBase64
-    let rawID: Data
+    let id: CredentialID
     /// Value will always be ``CredentialType/publicKey`` (for now)
     let type: CredentialType
     let raw: AuthenticatorAttestationResponse
@@ -89,7 +85,6 @@ struct ParsedCredentialCreationResponse {
     /// Create a `ParsedCredentialCreationResponse` from a raw `CredentialCreationResponse`.
     init(from rawResponse: RegistrationCredential) throws {
         id = rawResponse.id
-        rawID = Data(rawResponse.rawID)
 
         guard rawResponse.type == .publicKey
         else { throw WebAuthnError.invalidCredentialCreationType }
@@ -130,8 +125,13 @@ struct ParsedCredentialCreationResponse {
         )
 
         // Step 23.
-        guard rawID.count <= 1023 else {
-            throw WebAuthnError.credentialRawIDTooLong
+        guard id.bytes.count <= 1023 else {
+            throw WebAuthnError.credentialIDTooLong
+        }
+
+        // The client-supplied ID isn't covered by the attestation, so it must match the authenticator data.
+        guard id == attestedCredentialData.credentialID else {
+            throw WebAuthnError.credentialIDMismatch
         }
 
         return attestedCredentialData

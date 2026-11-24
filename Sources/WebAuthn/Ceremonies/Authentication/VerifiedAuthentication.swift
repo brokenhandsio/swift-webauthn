@@ -30,7 +30,7 @@ public struct VerifiedAuthentication: Sendable {
     }
 
     /// The credential id associated with the public key
-    public let credentialID: URLEncodedBase64
+    public let credentialID: CredentialID
     /// The updated sign count after the authentication ceremony
     public let newSignCount: UInt32
     /// Whether the authenticator is a single- or multi-device authenticator. This value is determined after

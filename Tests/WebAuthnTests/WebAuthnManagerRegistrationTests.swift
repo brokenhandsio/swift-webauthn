@@ -369,10 +369,10 @@ struct WebAuthnManagerRegistrationTests {
         TestKeyConfiguration.ecdsa,
         TestKeyConfiguration.rsa,
     ])
-    func finishRegistrationFailsIfRawIDIsTooLong(keyConfiguration: TestKeyConfiguration) async throws {
-        await #expect(throws: WebAuthnError.credentialRawIDTooLong) {
+    func finishRegistrationFailsIfIDIsTooLong(keyConfiguration: TestKeyConfiguration) async throws {
+        await #expect(throws: WebAuthnError.credentialIDTooLong) {
             try await finishRegistration(
-                rawID: [UInt8](repeating: 0, count: 1024),
+                credentialID: CredentialID(bytes: [UInt8](repeating: 0, count: 1024)),
                 attestationObject: keyConfiguration.attestationObject
             )
         }
@@ -385,6 +385,7 @@ struct WebAuthnManagerRegistrationTests {
     func finishAuthenticationFailsIfCredentialIDTooLong(keyConfiguration: TestKeyConfiguration) async throws {
         /// This should succeed as it's on the border of being acceptable
         _ = try await finishRegistration(
+            credentialID: CredentialID(bytes: [UInt8](repeating: 0, count: 1023)),
             attestationObject: keyConfiguration.attestationObjectBuilder
                 .authData {
                     $0
@@ -416,12 +417,102 @@ struct WebAuthnManagerRegistrationTests {
         }
     }
 
+    // A zero-length credential ID used to pass registration when the client
+    // submitted an empty `id` to match it.
+    @Test(arguments: [
+        TestKeyConfiguration.ecdsa,
+        TestKeyConfiguration.rsa,
+    ])
+    func finishRegistrationFailsIfCredentialIDIsEmpty(keyConfiguration: TestKeyConfiguration) async throws {
+        await #expect(throws: WebAuthnError.credentialIDTooShort) {
+            try await finishRegistration(
+                credentialID: CredentialID(bytes: [UInt8]()),
+                attestationObject: keyConfiguration.attestationObjectBuilder
+                    .authData {
+                        $0
+                            .attestedCredData(
+                                credentialIDLength: [0b00000000, 0b00000000],
+                                credentialID: [],
+                                credentialPublicKey: keyConfiguration.credentialPublicKey
+                            )
+                            .noExtensionData()
+                    }
+                    .build()
+                    .cborEncoded
+            )
+        }
+    }
+
+    @Test(arguments: [
+        TestKeyConfiguration.ecdsa,
+        TestKeyConfiguration.rsa,
+    ])
+    func finishRegistrationFailsIfCredentialIDDoesNotMatchAuthenticatorData(keyConfiguration: TestKeyConfiguration) async throws {
+        // The authenticator data contains the credential ID [1].
+        let attestationObject = keyConfiguration.attestationObjectBuilder
+            .authData {
+                $0
+                    .attestedCredData(credentialPublicKey: keyConfiguration.credentialPublicKey)
+                    .noExtensionData()
+            }
+            .build()
+            .cborEncoded
+
+        for submittedID: [UInt8] in [[2], [1, 1], [0, 1], []] {
+            _ = await confirmation("Duplicate check runs", expectedCount: 0) { duplicateCheck in
+                await #expect(throws: WebAuthnError.credentialIDMismatch) {
+                    try await finishRegistration(
+                        credentialID: CredentialID(bytes: submittedID),
+                        attestationObject: attestationObject,
+                        confirmCredentialIDNotRegisteredYet: { _ in
+                            duplicateCheck()
+                            return true
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    @Test(arguments: [
+        TestKeyConfiguration.ecdsa,
+        TestKeyConfiguration.rsa,
+    ])
+    func finishRegistrationUsesTheVerifiedCredentialID(keyConfiguration: TestKeyConfiguration) async throws {
+        let credentialIDBytes = [UInt8](0..<16)
+        let credentialID = CredentialID(bytes: credentialIDBytes)
+        var checkedID: CredentialID?
+
+        let credential = try await finishRegistration(
+            credentialID: credentialID,
+            attestationObject: keyConfiguration.attestationObjectBuilder
+                .authData {
+                    $0
+                        .attestedCredData(
+                            credentialIDLength: [0b00000000, 0b00010000],
+                            credentialID: credentialIDBytes,
+                            credentialPublicKey: keyConfiguration.credentialPublicKey
+                        )
+                        .noExtensionData()
+                }
+                .build()
+                .cborEncoded,
+            confirmCredentialIDNotRegisteredYet: { id in
+                checkedID = id
+                return true
+            }
+        )
+
+        #expect(checkedID == credentialID)
+        #expect(credential.id == credentialID)
+    }
+
     @Test(arguments: [
         TestKeyConfiguration.ecdsa,
         TestKeyConfiguration.rsa,
     ])
     func finishRegistrationSucceeds(keyConfiguration: TestKeyConfiguration) async throws {
-        let credentialID: [UInt8] = [0, 1, 0, 1, 0, 1]
+        let credentialID = CredentialID(bytes: [0b00000001])
         let credentialPublicKey: [UInt8] = keyConfiguration.credentialPublicKey
         let authData = keyConfiguration.authDataBuilder
             .attestedCredData(credentialPublicKey: credentialPublicKey)
@@ -432,11 +523,11 @@ struct WebAuthnManagerRegistrationTests {
             .cborEncoded
 
         let credential = try await finishRegistration(
-            rawID: credentialID,
+            credentialID: credentialID,
             attestationObject: attestationObject
         )
 
-        #expect(credential.id == credentialID.base64EncodedString().asString())
+        #expect(credential.id == credentialID)
         #expect(credential.publicKey == credentialPublicKey)
     }
 
@@ -446,7 +537,7 @@ struct WebAuthnManagerRegistrationTests {
     ])
     func credentialAAGUIDAccessorReturnsCorrectValue(keyConfiguration: TestKeyConfiguration) async throws {
         let testAAGUID = AAGUID(uuidString: "dd4ec289-e01d-41c9-bb89-70fa845d4bf2")!
-        let credentialID: [UInt8] = [0, 1, 0, 1, 0, 1]
+        let credentialID = CredentialID(bytes: [0b00000001])
         let credentialPublicKey: [UInt8] = keyConfiguration.credentialPublicKey
         let authData = keyConfiguration.authDataBuilder
             .attestedCredData(
@@ -460,7 +551,7 @@ struct WebAuthnManagerRegistrationTests {
             .cborEncoded
 
         let credential = try await finishRegistration(
-            rawID: credentialID,
+            credentialID: credentialID,
             attestationObject: attestationObject
         )
 
@@ -484,7 +575,7 @@ struct WebAuthnManagerRegistrationTests {
     ])
     func credentialAAGUIDAccessorReturnsAnonymousByDefault(keyConfiguration: TestKeyConfiguration) async throws {
         // When no AAGUID is specified, it defaults to .anonymous
-        let credentialID: [UInt8] = [0, 1, 0, 1, 0, 1]
+        let credentialID = CredentialID(bytes: [0b00000001])
         let credentialPublicKey: [UInt8] = keyConfiguration.credentialPublicKey
         let authData = keyConfiguration.authDataBuilder
             .attestedCredData(credentialPublicKey: credentialPublicKey)  // Uses .anonymous by default
@@ -495,7 +586,7 @@ struct WebAuthnManagerRegistrationTests {
             .cborEncoded
 
         let credential = try await finishRegistration(
-            rawID: credentialID,
+            credentialID: credentialID,
             attestationObject: attestationObject
         )
 
@@ -559,18 +650,17 @@ struct WebAuthnManagerRegistrationTests {
     private func finishRegistration(
         challenge: [UInt8] = TestConstants.mockChallenge,
         type: CredentialType = .publicKey,
-        rawID: [UInt8] = "e0fac9350509f71748d83782ccaf6b4c1462c615c70e255da1344e40887c8fcd".hexadecimal!,
+        credentialID: CredentialID = CredentialID(bytes: [0b00000001]),
         clientDataJSON: [UInt8] = TestClientDataJSON().jsonBytes,
         attestationObject: [UInt8],
         requireUserVerification: Bool = false,
-        confirmCredentialIDNotRegisteredYet: (String) async throws -> Bool = { _ in true }
+        confirmCredentialIDNotRegisteredYet: (CredentialID) async throws -> Bool = { _ in true }
     ) async throws -> Credential {
         try await webAuthnManager.finishRegistration(
             challenge: challenge,
             credentialCreationData: RegistrationCredential(
-                id: rawID.base64URLEncodedString(),
+                id: credentialID,
                 type: type,
-                rawID: rawID,
                 attestationResponse: AuthenticatorAttestationResponse(
                     clientDataJSON: clientDataJSON,
                     attestationObject: attestationObject

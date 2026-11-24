@@ -94,6 +94,9 @@ extension AuthenticatorData {
         /// **credentialIdLength** (2): Byte length L of credentialId, 16-bit unsigned big-endian integer. Value MUST be ≤ 1023.
         let idLength = UInt16(bigEndianBytes: data[53..<55])  // 2-byte big-endian length
 
+        guard idLength > 0
+        else { throw .credentialIDTooShort }
+
         guard idLength <= 1023
         else { throw .credentialIDTooLong }
 
@@ -102,7 +105,7 @@ extension AuthenticatorData {
         else { throw .credentialIDTooShort }
 
         /// **credentialId** (L): Credential ID
-        let credentialID = data[55..<credentialIDEndIndex]
+        let credentialID = CredentialID(bytes: data[55..<credentialIDEndIndex])
 
         /// **credentialPublicKey** (variable): The credential public key encoded in `COSE_Key` format, as defined in [Section 7](https://tools.ietf.org/html/rfc9052#section-7) of [RFC9052], using the CTAP2 canonical CBOR encoding form.
         /// Assuming valid CBOR, verify the public key's length by decoding the next CBOR item and checking how many bytes it consumed.
@@ -115,12 +118,12 @@ extension AuthenticatorData {
 
         let data = AttestedCredentialData(
             authenticatorAttestationGUID: aaguid,
-            credentialID: Array(credentialID),
+            credentialID: credentialID,
             publicKey: Array(publicKeyBytes)
         )
 
         /// `2` is the size of **credentialIdLength**
-        let length = AAGUID.size + 2 + data.credentialID.count + data.publicKey.count
+        let length = AAGUID.size + 2 + data.credentialID.bytes.count + data.publicKey.count
 
         return (data, length)
     }
