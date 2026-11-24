@@ -21,10 +21,10 @@ import Foundation
 ///
 /// When decoding using `Decodable`, `id` and `rawId` must be the same canonical base64url-encoded credential ID.
 public struct AuthenticationCredential: Sendable {
-    /// The credential ID of the newly created credential.
+    /// The ID of the credential used to create the assertion.
     public let id: CredentialID
 
-    /// The attestation response from the authenticator.
+    /// The assertion response from the authenticator.
     public let response: AuthenticatorAssertionResponse
 
     /// Reports the authenticator attachment modality in effect at the time the navigator.credentials.create() or
